@@ -93,6 +93,16 @@ const sources: CategorySource[] = [
   { id: 'countries', displayName: 'Countries', file: 'countries.txt' },
 ]
 
+interface CategoryIndexEntry {
+  id: string
+  displayName: string
+  minLetters: number
+  maxLetters: number
+  /** Exact lengths with a bucket — the range may have gaps. */
+  lengths: number[]
+}
+const index: CategoryIndexEntry[] = []
+
 mkdirSync(OUT_CATEGORIES, { recursive: true })
 for (const source of sources) {
   let words = toWords(readLines(source.file))
@@ -122,6 +132,13 @@ for (const source of sources) {
     wordsByLength,
   }
   writeJson(join(OUT_CATEGORIES, `${source.id}.json`), category)
+  index.push({
+    id: category.id,
+    displayName: category.displayName,
+    minLetters: category.minLetters,
+    maxLetters: category.maxLetters,
+    lengths,
+  })
 
   const total = lengths.reduce((sum, length) => sum + wordsByLength[String(length)].length, 0)
   console.log(
@@ -131,6 +148,11 @@ for (const source of sources) {
         : ''),
   )
 }
+
+// Lightweight metadata for the home grid and length picker — UI code can show
+// every category without loading any word list.
+writeJson(join(OUT_CATEGORIES, 'index.json'), index)
+console.log(`categories/index.json: ${index.length} categories`)
 
 function missingLengths(present: number[]): number[] {
   const set = new Set(present)

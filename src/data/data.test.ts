@@ -23,9 +23,9 @@ function readJson<T>(path: string): T {
 }
 
 describe('category data', () => {
-  it('ships exactly the six launch categories', () => {
+  it('ships exactly the six launch categories plus the index', () => {
     const files = readdirSync(CATEGORIES_DIR).filter((f) => f.endsWith('.json')).sort()
-    expect(files).toEqual(LAUNCH_CATEGORY_IDS.map((id) => `${id}.json`))
+    expect(files).toEqual([...LAUNCH_CATEGORY_IDS.map((id) => `${id}.json`), 'index.json'].sort())
   })
 
   for (const id of LAUNCH_CATEGORY_IDS) {
@@ -59,6 +59,32 @@ describe('category data', () => {
       })
     })
   }
+})
+
+describe('category index', () => {
+  interface IndexEntry {
+    id: string
+    displayName: string
+    minLetters: number
+    maxLetters: number
+    lengths: number[]
+  }
+  const index = readJson<IndexEntry[]>(join(CATEGORIES_DIR, 'index.json'))
+
+  it('lists all six launch categories', () => {
+    expect(index.map((e) => e.id).sort()).toEqual(LAUNCH_CATEGORY_IDS)
+  })
+
+  it('matches each category file exactly', () => {
+    for (const entry of index) {
+      const category = readJson<Category>(join(CATEGORIES_DIR, `${entry.id}.json`))
+      expect(entry.displayName).toBe(category.displayName)
+      expect(entry.minLetters).toBe(category.minLetters)
+      expect(entry.maxLetters).toBe(category.maxLetters)
+      const bucketLengths = Object.keys(category.wordsByLength).map(Number).sort((a, b) => a - b)
+      expect(entry.lengths).toEqual(bucketLengths)
+    }
+  })
 })
 
 describe('English guess dictionary', () => {

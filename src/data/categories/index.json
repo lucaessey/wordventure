@@ -1,0 +1,100 @@
+[
+  {
+    "id": "original",
+    "displayName": "Original",
+    "minLetters": 3,
+    "maxLetters": 14,
+    "lengths": [
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14
+    ]
+  },
+  {
+    "id": "pokemon",
+    "displayName": "Pokemon",
+    "minLetters": 4,
+    "maxLetters": 11,
+    "lengths": [
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11
+    ]
+  },
+  {
+    "id": "minecraft",
+    "displayName": "Minecraft",
+    "minLetters": 3,
+    "maxLetters": 10,
+    "lengths": [
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10
+    ]
+  },
+  {
+    "id": "brawl-stars",
+    "displayName": "Brawl Stars",
+    "minLetters": 3,
+    "maxLetters": 7,
+    "lengths": [
+      3,
+      4,
+      5,
+      6,
+      7
+    ]
+  },
+  {
+    "id": "animals",
+    "displayName": "Animals",
+    "minLetters": 3,
+    "maxLetters": 11,
+    "lengths": [
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11
+    ]
+  },
+  {
+    "id": "countries",
+    "displayName": "Countries",
+    "minLetters": 4,
+    "maxLetters": 11,
+    "lengths": [
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11
+    ]
+  }
+]
