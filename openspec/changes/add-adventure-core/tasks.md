@@ -25,4 +25,4 @@
 
 - [x] 5.1 `npm test` green and `npm run build` clean
 - [x] 5.2 Manual preview pass: start a run, verify life drain and coin rewards, boss badge/taunt at level 5 (via a save-state shortcut if needed), mid-puzzle reload resumes exactly, death clears the save and restarts from level 1, leaving and re-entering keeps the run, Infinite regression after the theme extraction
-- [ ] 5.3 Push to GitHub and verify the deployed app
+- [x] 5.3 Push to GitHub and verify the deployed app
