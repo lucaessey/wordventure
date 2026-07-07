@@ -1,5 +1,15 @@
 {
   "normal": {
     "guessCount": 6
+  },
+  "infinite": {
+    "levelCount": 12,
+    "startLength": 3,
+    "startingPool": 4,
+    "rewards": {
+      "easy": 4,
+      "medium": 3,
+      "hard": 2
+    }
   }
 }

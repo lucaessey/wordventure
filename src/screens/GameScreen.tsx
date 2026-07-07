@@ -111,7 +111,14 @@ export function GameScreen({ categoryId, length, onHome }: GameScreenProps) {
   return (
     <div className="game">
       {message && <div className="toast">{message}</div>}
-      <Board round={round} shakeToken={shakeToken} />
+      <Board
+        length={round.answer.length}
+        guesses={round.guesses}
+        input={round.input}
+        active={round.status === 'playing'}
+        rows={round.maxGuesses}
+        shakeToken={shakeToken}
+      />
       <Keyboard states={keyboardState(round.guesses)} onKey={handleKey} />
       {round.status !== 'playing' && (
         <div className="overlay">
