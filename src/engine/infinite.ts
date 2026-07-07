@@ -1,4 +1,5 @@
 import { balance } from '../data/balance'
+import { pickLevelCategory, type CategoryOption, type CategoryTheme } from './categoryTheme'
 import { scoreGuess } from './feedback'
 import { selectAnswer } from './selectAnswer'
 import { validateGuess } from './validateGuess'
@@ -6,16 +7,9 @@ import type { Category, ScoredGuess } from './types'
 
 export type Difficulty = 'easy' | 'medium' | 'hard'
 
-export type InfiniteTheme =
-  | { kind: 'fixed'; categoryId: string }
-  | { kind: 'random' }
-  | { kind: 'custom'; categoryIds: string[] }
-
-/** Category metadata the engine needs for eligibility — UI passes it from the data index. */
-export interface CategoryOption {
-  id: string
-  lengths: number[]
-}
+/** Theme machinery lives in categoryTheme.ts (shared with Adventure); re-exported for compat. */
+export type InfiniteTheme = CategoryTheme
+export { pickLevelCategory, FALLBACK_CATEGORY_ID, type CategoryOption } from './categoryTheme'
 
 export interface InfiniteConfig {
   levelCount: number
@@ -44,33 +38,8 @@ export interface InfiniteRunState {
   phase: InfinitePhase
 }
 
-export const FALLBACK_CATEGORY_ID = 'original'
-
 export function lengthForLevel(config: InfiniteConfig, level: number): number {
   return config.startLength + level - 1
-}
-
-/**
- * Pick the category for a level per the theme, restricted to categories whose
- * word lists support the level's length. Falls back to Original when none
- * qualify (Original spans every playable length).
- */
-export function pickLevelCategory(
-  theme: InfiniteTheme,
-  length: number,
-  categories: readonly CategoryOption[],
-  rng: () => number = Math.random,
-): string {
-  const supports = (id: string) =>
-    categories.some((c) => c.id === id && c.lengths.includes(length))
-
-  if (theme.kind === 'fixed') {
-    return supports(theme.categoryId) ? theme.categoryId : FALLBACK_CATEGORY_ID
-  }
-  const pool =
-    theme.kind === 'custom' ? theme.categoryIds.filter(supports) : categories.filter((c) => c.lengths.includes(length)).map((c) => c.id)
-  if (pool.length === 0) return FALLBACK_CATEGORY_ID
-  return pool[Math.floor(rng() * pool.length)]
 }
 
 export function startRun(

@@ -3,13 +3,14 @@ import { balance } from '../data/balance'
 interface HomeScreenProps {
   onNormal: () => void
   onInfinite: () => void
+  onAdventure: () => void
 }
 
 const INFINITE_BLURB = `${balance.infinite.levelCount} levels, words growing ${balance.infinite.startLength} to ${
   balance.infinite.startLength + balance.infinite.levelCount - 1
 } letters, one shared guess pool`
 
-export function HomeScreen({ onNormal, onInfinite }: HomeScreenProps) {
+export function HomeScreen({ onNormal, onInfinite, onAdventure }: HomeScreenProps) {
   return (
     <div className="home">
       <p className="home-tagline">Pick a mode</p>
@@ -21,6 +22,12 @@ export function HomeScreen({ onNormal, onInfinite }: HomeScreenProps) {
         <button className="mode-card" onClick={onInfinite}>
           <span className="mode-name">Infinite</span>
           <span className="mode-blurb">{INFINITE_BLURB}</span>
+        </button>
+        <button className="mode-card" onClick={onAdventure}>
+          <span className="mode-name">Adventure</span>
+          <span className="mode-blurb">
+            Save your Wordle company — lives are guesses, coins buy your way to the final showdown
+          </span>
         </button>
       </div>
     </div>

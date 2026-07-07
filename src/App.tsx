@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import { categories } from './data/load'
+import { startRun as startAdventureRun, type AdventureRunState } from './engine/adventure'
+import type { CategoryOption } from './engine/categoryTheme'
 import type { Difficulty, InfiniteTheme } from './engine/infinite'
 import { HomeScreen } from './screens/HomeScreen'
 import { CategoryGridScreen } from './screens/CategoryGridScreen'
@@ -7,6 +9,10 @@ import { LengthPickerScreen } from './screens/LengthPickerScreen'
 import { GameScreen } from './screens/GameScreen'
 import { InfiniteSetupScreen } from './screens/InfiniteSetupScreen'
 import { InfiniteRunScreen } from './screens/InfiniteRunScreen'
+import { AdventureSetupScreen } from './screens/AdventureSetupScreen'
+import { AdventureRunScreen } from './screens/AdventureRunScreen'
+
+const CATEGORY_OPTIONS: CategoryOption[] = categories.map(({ id, lengths }) => ({ id, lengths }))
 
 type Screen =
   | { name: 'home' }
@@ -15,6 +21,8 @@ type Screen =
   | { name: 'game'; categoryId: string; length: number }
   | { name: 'infinite-setup' }
   | { name: 'infinite-run'; difficulty: Difficulty; theme: InfiniteTheme }
+  | { name: 'adventure-setup' }
+  | { name: 'adventure-run'; run: AdventureRunState }
 
 function categoryName(categoryId: string): string {
   return categories.find((c) => c.id === categoryId)?.displayName ?? categoryId
@@ -28,6 +36,8 @@ function backTarget(screen: Screen): Screen {
       return { name: 'category-grid' }
     case 'infinite-run':
       return { name: 'infinite-setup' }
+    case 'adventure-run':
+      return { name: 'adventure-setup' }
     default:
       return { name: 'home' }
   }
@@ -43,6 +53,9 @@ function headerContext(screen: Screen): string {
     case 'infinite-setup':
     case 'infinite-run':
       return 'Infinite'
+    case 'adventure-setup':
+    case 'adventure-run':
+      return 'Adventure'
     default:
       return ''
   }
@@ -50,6 +63,8 @@ function headerContext(screen: Screen): string {
 
 export default function App() {
   const [screen, setScreen] = useState<Screen>({ name: 'home' })
+  // Bumped for every fresh Adventure run so the run screen remounts with the new state
+  const [runNonce, setRunNonce] = useState(0)
 
   return (
     <div className="app">
@@ -73,6 +88,7 @@ export default function App() {
         <HomeScreen
           onNormal={() => setScreen({ name: 'category-grid' })}
           onInfinite={() => setScreen({ name: 'infinite-setup' })}
+          onAdventure={() => setScreen({ name: 'adventure-setup' })}
         />
       )}
       {screen.name === 'category-grid' && (
@@ -105,6 +121,32 @@ export default function App() {
           difficulty={screen.difficulty}
           theme={screen.theme}
           onHome={() => setScreen({ name: 'home' })}
+        />
+      )}
+      {screen.name === 'adventure-setup' && (
+        <AdventureSetupScreen
+          onStart={(theme) => {
+            setRunNonce((n) => n + 1)
+            setScreen({ name: 'adventure-run', run: startAdventureRun(theme, CATEGORY_OPTIONS) })
+          }}
+          onContinue={(run) => {
+            setRunNonce((n) => n + 1)
+            setScreen({ name: 'adventure-run', run })
+          }}
+        />
+      )}
+      {screen.name === 'adventure-run' && (
+        <AdventureRunScreen
+          key={runNonce}
+          initialRun={screen.run}
+          onHome={() => setScreen({ name: 'home' })}
+          onNewRun={() => {
+            setRunNonce((n) => n + 1)
+            setScreen({
+              name: 'adventure-run',
+              run: startAdventureRun(screen.run.theme, CATEGORY_OPTIONS),
+            })
+          }}
         />
       )}
     </div>

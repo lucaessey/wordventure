@@ -23,6 +23,21 @@ export interface Balance {
       hard: number
     }
   }
+  adventure: {
+    /** Campaign length. */
+    levelCount: number
+    /** Lives at the start of a run — lives ARE guesses. */
+    startingLives: number
+    /** Boss level number → word length. Design-fixed; do not retune casually. */
+    bossLevels: Record<string, number>
+    /** Word lengths for the non-boss levels in campaign order. Tune in playtesting. */
+    nonBossRamp: number[]
+    /** Coins earned for beating a level / a boss. */
+    rewards: {
+      level: number
+      boss: number
+    }
+  }
 }
 
 export const balance: Balance = balanceData
