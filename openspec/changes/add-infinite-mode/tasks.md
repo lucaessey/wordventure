@@ -21,4 +21,4 @@
 
 - [x] 4.1 `npm test` green and `npm run build` clean
 - [x] 4.2 Manual preview pass: full run on Easy (reward moments, pool display), a run-over (pool to 0), theme variants including a narrow custom subset hitting the Original fallback at high lengths, high scores persisting across reloads, back navigation from every new screen
-- [ ] 4.3 Push to GitHub and verify the deployed app plays Infinite correctly
+- [x] 4.3 Push to GitHub and verify the deployed app plays Infinite correctly
