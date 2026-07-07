@@ -51,10 +51,8 @@ describe('category data', () => {
       it('has every word normalized (uppercase A-Z) and matching its bucket length', () => {
         for (const [key, words] of Object.entries(category.wordsByLength)) {
           const length = Number(key)
-          for (const word of words) {
-            expect(word).toMatch(ONLY_AZ)
-            expect(word).toHaveLength(length)
-          }
+          const bad = words.filter((word) => word.length !== length || !ONLY_AZ.test(word))
+          expect(bad).toEqual([])
         }
       })
     })
@@ -98,10 +96,8 @@ describe('English guess dictionary', () => {
   it('contains only normalized words of the bucket length', () => {
     for (let length = 3; length <= 14; length++) {
       const words = readJson<string[]>(join(DICTIONARY_DIR, `${length}.json`))
-      for (const word of words) {
-        expect(word).toMatch(ONLY_AZ)
-        expect(word).toHaveLength(length)
-      }
+      const bad = words.filter((word) => word.length !== length || !ONLY_AZ.test(word))
+      expect(bad).toEqual([])
     }
   })
 })
