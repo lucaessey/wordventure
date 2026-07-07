@@ -25,7 +25,7 @@
 ## 5. Deploy
 
 - [x] 5.1 Add `.github/workflows/deploy.yml`: on push to main - `npm ci`, `npm test`, `npm run build`, then `actions/configure-pages` + `actions/upload-pages-artifact` + `actions/deploy-pages`; confirm the Vite `base` matches the actual GitHub repo name (adjust or derive from the repo variable)
-- [ ] 5.2 Push to GitHub with Pages enabled (source: GitHub Actions) and verify the deployed URL loads, plays a full Normal game, and works offline on a second visit
+- [x] 5.2 Push to GitHub with Pages enabled (source: GitHub Actions) and verify the deployed URL loads, plays a full Normal game, and works offline on a second visit
 
 ## 6. Verification
 
