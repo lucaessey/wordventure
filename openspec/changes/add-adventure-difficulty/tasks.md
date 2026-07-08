@@ -18,4 +18,4 @@
 
 - [x] 4.1 `npm test` green and `npm run build` clean
 - [x] 4.2 Manual preview pass: start one run per difficulty and verify lives/perk seeding (Easy's shop shows the owned perk with only the upgrade offered); win a level on Easy and see the free perk's +1 life; resume a saved run and confirm the picker is bypassed and the difficulty shows on the Continue card and strip; old-format save discarded
-- [ ] 4.3 Archive/sync `add-adventure-shop` first if still active, then push to GitHub and verify the deployed app
+- [x] 4.3 Archive/sync `add-adventure-shop` first if still active, then push to GitHub and verify the deployed app
