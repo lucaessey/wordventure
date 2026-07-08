@@ -9,6 +9,7 @@
     "lint": "oxlint",
     "generate:words": "tsx scripts/generate-words.ts",
     "generate:icons": "tsx scripts/generate-icons.ts",
+    "generate:placeholder-pokemon": "tsx scripts/generate-placeholder-pokemon.ts",
     "test": "vitest run",
     "test:watch": "vitest",
     "preview": "vite preview"

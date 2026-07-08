@@ -2,6 +2,9 @@
   "normal": {
     "guessCount": 6
   },
+  "whosThatPokemon": {
+    "guessCount": 6
+  },
   "infinite": {
     "levelCount": 12,
     "startLength": 3,

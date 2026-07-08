@@ -1,0 +1,17 @@
+[
+  {
+    "name": "Bulbasaur",
+    "silhouetteImage": "pokemon/bulbasaur.png",
+    "revealImage": "pokemon/bulbasaur.png"
+  },
+  {
+    "name": "Charmander",
+    "silhouetteImage": "pokemon/charmander.png",
+    "revealImage": "pokemon/charmander.png"
+  },
+  {
+    "name": "Pikachu",
+    "silhouetteImage": "pokemon/pikachu.png",
+    "revealImage": "pokemon/pikachu.png"
+  }
+]

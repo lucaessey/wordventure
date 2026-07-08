@@ -11,6 +11,7 @@ import { InfiniteSetupScreen } from './screens/InfiniteSetupScreen'
 import { InfiniteRunScreen } from './screens/InfiniteRunScreen'
 import { AdventureSetupScreen } from './screens/AdventureSetupScreen'
 import { AdventureRunScreen } from './screens/AdventureRunScreen'
+import { WhosThatPokemonScreen } from './screens/WhosThatPokemonScreen'
 
 const CATEGORY_OPTIONS: CategoryOption[] = categories.map(({ id, lengths }) => ({ id, lengths }))
 
@@ -23,6 +24,7 @@ type Screen =
   | { name: 'infinite-run'; difficulty: Difficulty; theme: InfiniteTheme }
   | { name: 'adventure-setup' }
   | { name: 'adventure-run'; run: AdventureRunState }
+  | { name: 'whos-that-pokemon' }
 
 function categoryName(categoryId: string): string {
   return categories.find((c) => c.id === categoryId)?.displayName ?? categoryId
@@ -56,6 +58,8 @@ function headerContext(screen: Screen): string {
     case 'adventure-setup':
     case 'adventure-run':
       return 'Adventure'
+    case 'whos-that-pokemon':
+      return "Who's That Pokemon?"
     default:
       return ''
   }
@@ -89,6 +93,7 @@ export default function App() {
           onNormal={() => setScreen({ name: 'category-grid' })}
           onInfinite={() => setScreen({ name: 'infinite-setup' })}
           onAdventure={() => setScreen({ name: 'adventure-setup' })}
+          onWhosThatPokemon={() => setScreen({ name: 'whos-that-pokemon' })}
         />
       )}
       {screen.name === 'category-grid' && (
@@ -152,6 +157,9 @@ export default function App() {
             })
           }}
         />
+      )}
+      {screen.name === 'whos-that-pokemon' && (
+        <WhosThatPokemonScreen onHome={() => setScreen({ name: 'home' })} />
       )}
     </div>
   )

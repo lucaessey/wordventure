@@ -7,6 +7,11 @@ describe('balance', () => {
     expect(Number.isInteger(balance.normal.guessCount)).toBe(true)
   })
 
+  it('exposes the Who\'s That Pokemon guess count', () => {
+    expect(balance.whosThatPokemon.guessCount).toBeGreaterThan(0)
+    expect(Number.isInteger(balance.whosThatPokemon.guessCount)).toBe(true)
+  })
+
   it('exposes the Infinite mode values', () => {
     const { levelCount, startLength, startingPool, rewards } = balance.infinite
     expect(levelCount).toBeGreaterThan(0)

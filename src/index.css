@@ -147,6 +147,67 @@ button {
   color: var(--text-dim);
 }
 
+/* --- Who's That Pokemon? ---------------------------------------------------- */
+
+.pokemon-stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 0 4px;
+}
+
+.pokemon-frame {
+  width: min(42vw, 168px);
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+}
+
+.pokemon-img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  transition: filter 0.35s ease;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Single-image silhouette: knock the art to black until revealed */
+.pokemon-silhouette {
+  filter: brightness(0);
+}
+
+.pokemon-prompt {
+  margin: 0;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--text-dim);
+}
+
+.pokemon-name {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.pokemon-name-won {
+  color: var(--green);
+}
+
+.result-bar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0 14px;
+}
+
+.result-text {
+  color: var(--text-dim);
+  font-size: 0.9rem;
+}
+
 /* --- Infinite setup --------------------------------------------------------- */
 
 .setup-heading {
