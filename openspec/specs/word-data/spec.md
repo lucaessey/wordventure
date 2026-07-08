@@ -17,15 +17,21 @@ Each word category SHALL be a static JSON file in `src/data/categories/` with th
 - **THEN** every bucket present in `wordsByLength` is non-empty, and length buckets below the generator's minimum word count are omitted entirely
 
 ### Requirement: Launch categories
-The project SHALL ship eight category files: Original, Pokemon, Minecraft, Brawl Stars, Animals, Countries, Food, and Sports. Each category's letter range SHALL be derived from what its word list actually supports; ranges MAY differ per category (e.g., Original spans 4–14 while a franchise category spans a narrower range).
+The project SHALL ship eleven category files: Original, Pokemon, Minecraft, Brawl Stars, Animals, Countries, Food, Sports, Movies & TV, Dragon Ball, and Nintendo Switch. Each category's letter range SHALL be derived from what its word list actually supports; ranges MAY differ per category (e.g., Original spans 4–14 while a franchise category spans a narrower range).
 
 The Food category SHALL contain a broad mix of foods, dishes, fruits, vegetables, and snacks; it SHALL be generic only (no brand names); its range SHALL be 3–10 letters with at least 20 words per length; multi-word dishes SHALL be normalized to letters-only (e.g. HOTDOG) or excluded.
 
 The Sports category SHALL contain athletic activities themselves (e.g. SKI, GOLF, RUGBY, SOCCER, HOCKEY, LACROSSE), not teams; its declared range SHALL be 3–10 letters; because it is a naturally small curated list, it SHALL include every real entry rather than pad with obscure ones, and its length buckets MAY fall below the generator's usual minimum word count (a length bucket MAY be small).
 
-#### Scenario: All eight categories present
+The Movies & TV category SHALL contain single-word screen titles with broad kid/teen recognition (e.g. FROZEN, MOANA, ENCANTO, BLUEY, WEDNESDAY, POKEMON); multi-word titles SHALL be skipped rather than concatenated. Its declared range SHALL be 4–10 letters. It is a naturally small curated list: it SHALL include real recognizable titles rather than pad with obscure films, and its length buckets MAY be small.
+
+The Dragon Ball category SHALL contain character names (e.g. GOKU, VEGETA, GOHAN, PICCOLO, FRIEZA, TRUNKS, CELL, BROLY, KRILLIN, BULMA). Its declared range SHALL be 3–10 letters, aiming for at least 15 words per length where the source allows; where a length has few canonical names, it SHALL include what exists rather than invent entries (a length bucket MAY be small).
+
+The Nintendo Switch category SHALL contain Switch game titles and franchises expressed as single words (e.g. MARIO, ZELDA, KIRBY, SPLATOON, METROID, PIKMIN, BAYONETTA); only single-word entries SHALL be included. Its declared range SHALL be 4–10 letters. It is a naturally small curated list: it SHALL include real recognizable titles rather than pad, and its length buckets MAY be small.
+
+#### Scenario: All eleven categories present
 - **WHEN** the app's category data is enumerated
-- **THEN** exactly the eight launch categories are found, each with a valid schema and a non-empty word list
+- **THEN** exactly the eleven launch categories are found, each with a valid schema and a non-empty word list
 
 #### Scenario: Food density
 - **WHEN** the Food category file is inspected
@@ -34,6 +40,10 @@ The Sports category SHALL contain athletic activities themselves (e.g. SKI, GOLF
 #### Scenario: Sports is complete rather than padded
 - **WHEN** the Sports category file is inspected
 - **THEN** it contains athletic activities (not teams) within the 3–10 declared range, keeping every real entry even where a length bucket is small
+
+#### Scenario: New franchise categories are single-word and within range
+- **WHEN** the Movies & TV, Dragon Ball, and Nintendo Switch category files are inspected
+- **THEN** every entry is a single normalized uppercase A–Z token within that category's declared range (Movies & TV and Nintendo Switch 4–10, Dragon Ball 3–10), with no multi-word entries and small buckets permitted
 
 ### Requirement: English guess dictionary
 The project SHALL include a shared English guess dictionary sourced from a public-domain word list, bucketed by word length covering lengths 3 through 14, stored as static committed JSON. It is used only to validate guesses, never to draw answers.
