@@ -29,6 +29,10 @@ interface CategorySource {
   file: string
   /** Keep only words that also appear in this set (used by Original). */
   restrictTo?: ReadonlySet<string>
+  /** Drop length buckets below this count. Defaults to MIN_WORDS_PER_BUCKET. */
+  minWords?: number
+  /** Cap the category's word length (declared range). Defaults to MAX_LENGTH. */
+  maxLength?: number
 }
 
 function readLines(file: string): string[] {
@@ -91,6 +95,11 @@ const sources: CategorySource[] = [
   { id: 'brawl-stars', displayName: 'Brawl Stars', file: 'brawl-stars.txt' },
   { id: 'animals', displayName: 'Animals', file: 'animals.txt' },
   { id: 'countries', displayName: 'Countries', file: 'countries.txt' },
+  // Food: broad, generic, no brands. Curated to 3-10 with 20+ per length.
+  { id: 'food', displayName: 'Food', file: 'food.txt', maxLength: 10 },
+  // Sports: activities not teams. Naturally small — keep every real entry
+  // (minWords 1) rather than pad; declared range 3-10.
+  { id: 'sports', displayName: 'Sports', file: 'sports.txt', minWords: 1, maxLength: 10 },
 ]
 
 interface CategoryIndexEntry {
@@ -110,18 +119,20 @@ for (const source of sources) {
     words = words.filter((word) => source.restrictTo!.has(word))
   }
 
+  const minWords = source.minWords ?? MIN_WORDS_PER_BUCKET
+  const maxLength = source.maxLength ?? MAX_LENGTH
   const buckets = bucketByLength(words)
   const wordsByLength: Record<string, string[]> = {}
   const lengths: number[] = []
-  for (let length = MIN_LENGTH; length <= MAX_LENGTH; length++) {
+  for (let length = MIN_LENGTH; length <= maxLength; length++) {
     const bucket = buckets.get(length)
-    if (bucket && bucket.length >= MIN_WORDS_PER_BUCKET) {
+    if (bucket && bucket.length >= minWords) {
       wordsByLength[String(length)] = bucket
       lengths.push(length)
     }
   }
   if (lengths.length === 0) {
-    throw new Error(`Category '${source.id}' has no length bucket with >= ${MIN_WORDS_PER_BUCKET} words`)
+    throw new Error(`Category '${source.id}' has no length bucket with >= ${minWords} words`)
   }
 
   const category: Category = {

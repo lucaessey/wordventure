@@ -1,0 +1,84 @@
+{
+  "id": "sports",
+  "displayName": "Sports",
+  "minLetters": 3,
+  "maxLetters": 10,
+  "wordsByLength": {
+    "3": [
+      "SKI"
+    ],
+    "4": [
+      "GOLF",
+      "JUDO",
+      "LUGE",
+      "POLO",
+      "SUMO"
+    ],
+    "5": [
+      "BOCCE",
+      "DARTS",
+      "RUGBY"
+    ],
+    "6": [
+      "BOXING",
+      "DIVING",
+      "HIKING",
+      "HOCKEY",
+      "KARATE",
+      "ROWING",
+      "SKIING",
+      "SOCCER",
+      "SQUASH",
+      "TENNIS"
+    ],
+    "7": [
+      "ARCHERY",
+      "BOBSLED",
+      "BOWLING",
+      "CRICKET",
+      "CURLING",
+      "CYCLING",
+      "FENCING",
+      "HURLING",
+      "JOGGING",
+      "NETBALL",
+      "PARKOUR",
+      "RUNNING",
+      "SAILING",
+      "SKATING",
+      "SNOOKER",
+      "SURFING"
+    ],
+    "8": [
+      "BASEBALL",
+      "BIATHLON",
+      "CANOEING",
+      "CLIMBING",
+      "FOOTBALL",
+      "HANDBALL",
+      "KAYAKING",
+      "LACROSSE",
+      "MARATHON",
+      "SOFTBALL",
+      "SWIMMING",
+      "YACHTING"
+    ],
+    "9": [
+      "BADMINTON",
+      "BILLIARDS",
+      "DECATHLON",
+      "SPRINTING",
+      "TAEKWONDO",
+      "TRIATHLON",
+      "WATERPOLO",
+      "WRESTLING"
+    ],
+    "10": [
+      "BASKETBALL",
+      "GYMNASTICS",
+      "KICKBOXING",
+      "PENTATHLON",
+      "VOLLEYBALL"
+    ]
+  }
+}

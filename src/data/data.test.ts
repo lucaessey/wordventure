@@ -11,9 +11,11 @@ const LAUNCH_CATEGORY_IDS = [
   'animals',
   'brawl-stars',
   'countries',
+  'food',
   'minecraft',
   'original',
   'pokemon',
+  'sports',
 ]
 
 const ONLY_AZ = /^[A-Z]+$/
@@ -23,7 +25,7 @@ function readJson<T>(path: string): T {
 }
 
 describe('category data', () => {
-  it('ships exactly the six launch categories plus the index', () => {
+  it('ships exactly the eight launch categories plus the index', () => {
     const files = readdirSync(CATEGORIES_DIR).filter((f) => f.endsWith('.json')).sort()
     expect(files).toEqual([...LAUNCH_CATEGORY_IDS.map((id) => `${id}.json`), 'index.json'].sort())
   })
@@ -69,7 +71,7 @@ describe('category index', () => {
   }
   const index = readJson<IndexEntry[]>(join(CATEGORIES_DIR, 'index.json'))
 
-  it('lists all six launch categories', () => {
+  it('lists all eight launch categories', () => {
     expect(index.map((e) => e.id).sort()).toEqual(LAUNCH_CATEGORY_IDS)
   })
 
@@ -81,6 +83,42 @@ describe('category index', () => {
       expect(entry.maxLetters).toBe(category.maxLetters)
       const bucketLengths = Object.keys(category.wordsByLength).map(Number).sort((a, b) => a - b)
       expect(entry.lengths).toEqual(bucketLengths)
+    }
+  })
+})
+
+describe('Food category', () => {
+  const food = readJson<Category>(join(CATEGORIES_DIR, 'food.json'))
+
+  it('spans 3-10 letters', () => {
+    expect(food.minLetters).toBe(3)
+    expect(food.maxLetters).toBe(10)
+    for (let length = 3; length <= 10; length++) {
+      expect(food.wordsByLength[String(length)]).toBeDefined()
+    }
+  })
+
+  it('has at least 20 words in every length bucket', () => {
+    for (const [length, words] of Object.entries(food.wordsByLength)) {
+      expect(words.length, `length ${length}`).toBeGreaterThanOrEqual(20)
+    }
+  })
+})
+
+describe('Sports category', () => {
+  const sports = readJson<Category>(join(CATEGORIES_DIR, 'sports.json'))
+
+  it('is within the declared 3-10 range', () => {
+    expect(sports.minLetters).toBeGreaterThanOrEqual(3)
+    expect(sports.maxLetters).toBeLessThanOrEqual(10)
+  })
+
+  it('keeps every real entry, allowing small buckets', () => {
+    // A curated category may have length buckets below the usual minimum
+    const total = Object.values(sports.wordsByLength).reduce((sum, w) => sum + w.length, 0)
+    expect(total).toBeGreaterThan(0)
+    for (const words of Object.values(sports.wordsByLength)) {
+      expect(words.length).toBeGreaterThanOrEqual(1)
     }
   })
 })
