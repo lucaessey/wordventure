@@ -43,9 +43,25 @@ Wordventure is a Wordle-derived progressive web app, built as a father-son proje
 Theme: save your Wordle company from bankruptcy at the hands of a rival word-search magazine company.
 
 - Campaign: 25 levels. Boss levels at 5, 10, 15, 20, 25 with word lengths 10, 11, 12, 13, 14. Level 25 is the final showdown. Non-boss word lengths: ramp upward across the campaign (exact ramp is a balance.json value, tune in playtesting).
-- Lives ARE guesses: start with 4 lives; every guess spent subtracts one life. Reach 0 without insurance → run over → full restart from level 1. No checkpoints.
-- Save/resume: full run state (level, lives, coins, upgrades, insurance, current puzzle and guesses) snapshots to localStorage after EVERY guess.
+- Lives ARE guesses: start with the difficulty's starting lives (see Difficulty modes); every guess spent subtracts one life. Reach 0 without insurance → run over → full restart from level 1. No checkpoints.
+- Save/resume: full run state (difficulty, level, lives, coins, upgrades, insurance, current puzzle and guesses) snapshots to localStorage after EVERY guess.
 - Category options: all categories mixed, one category, or a custom subset.
+
+### Difficulty modes
+
+Three difficulties, chosen when starting a new run:
+
+- EASY: start with 6 lives. The player begins the run already owning permanent upgrade Perk A at its base tier (+1 life every level beaten), for free. This free perk does NOT consume a boss-unlock slot, and it CAN still be upgraded to +2 lives for $80 as normal once a slot is available.
+- NORMAL: start with 6 lives. Everything else exactly as the original design (no free perks).
+- HARD: the original design unchanged — start with 4 lives, no free perks.
+
+Rules that apply to all difficulties:
+
+- Difficulty is locked for the duration of a run; it cannot be changed mid-run. It is stored in the run's save state.
+- All other Adventure rules (economy, insurance, bosses, skips, shop timing, permanent unlock slots) are identical across difficulties.
+- Starting lives per difficulty and Easy's starting perk are defined in balance.json (e.g. `adventure.startingLives.easy/normal/hard`, `adventure.startingPerks.easy`), not hardcoded.
+- Any completion stats or records for Adventure are tracked per difficulty, like Infinite mode's high scores.
+- The difficulty picker appears on the Adventure new-run screen; resuming a saved run bypasses the picker.
 
 ### Economy (all values in balance.json)
 
@@ -73,6 +89,7 @@ Theme: save your Wordle company from bankruptcy at the hands of a rival word-sea
 3. `add-infinite-mode`
 4. `add-adventure-core` — run loop, lives, coins, bosses, save/resume.
 5. `add-adventure-shop` — hints, insurance, permanent upgrades.
+6. `add-adventure-difficulty` — Easy/Normal/Hard difficulty modes for Adventure.
 
 ## Open items (mark as "tune in playtesting" where they appear in specs)
 
