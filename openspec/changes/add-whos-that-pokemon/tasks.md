@@ -20,4 +20,4 @@
 
 - [x] 4.1 `npm test` green and `npm run build` clean
 - [x] 4.2 Manual preview pass: the mode appears on home; a round shows a (placeholder) silhouette with a correctly sized board; a valid Pokemon-name guess and a dictionary-word guess are both accepted and scored; an unknown word is rejected at no cost; winning and running out both reveal the full image + name; play-again starts a fresh entry; back returns home
-- [ ] 4.3 Push to GitHub and verify the deployed app (placeholder art expected until real images are supplied)
+- [x] 4.3 Push to GitHub and verify the deployed app (placeholder art expected until real images are supplied)
