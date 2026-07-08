@@ -1,18 +1,35 @@
 import { useState } from 'react'
+import { balance } from '../data/balance'
 import { categories } from '../data/load'
 import { STORY_INTRO } from '../data/story'
-import type { AdventureRunState } from '../engine/adventure'
+import type { AdventureDifficulty, AdventureRunState } from '../engine/adventure'
 import type { CategoryTheme } from '../engine/categoryTheme'
 import { loadRun } from '../storage/adventureSave'
 
 interface AdventureSetupScreenProps {
-  onStart: (theme: CategoryTheme) => void
+  onStart: (difficulty: AdventureDifficulty, theme: CategoryTheme) => void
   onContinue: (run: AdventureRunState) => void
 }
 
 type ThemeKind = CategoryTheme['kind']
 
+const DIFFICULTY_LABELS: Record<AdventureDifficulty, string> = {
+  easy: 'Easy',
+  normal: 'Normal',
+  hard: 'Hard',
+}
+
+/** Blurb built from balance values so it never drifts from the numbers. */
+function difficultyBlurb(difficulty: AdventureDifficulty): string {
+  const lives = balance.adventure.startingLives[difficulty]
+  const perks = balance.adventure.startingPerks[difficulty]
+  const parts = [`${lives} lives`]
+  if (perks.perkA) parts.push('free bonus-lives perk')
+  return parts.join(' · ')
+}
+
 export function AdventureSetupScreen({ onStart, onContinue }: AdventureSetupScreenProps) {
+  const [difficulty, setDifficulty] = useState<AdventureDifficulty>('normal')
   const [themeKind, setThemeKind] = useState<ThemeKind>('random')
   const [fixedCategory, setFixedCategory] = useState(categories[0].id)
   const [customIds, setCustomIds] = useState<string[]>(categories.map((c) => c.id))
@@ -29,7 +46,7 @@ export function AdventureSetupScreen({ onStart, onContinue }: AdventureSetupScre
         : themeKind === 'custom'
           ? { kind: 'custom', categoryIds: customIds }
           : { kind: 'random' }
-    onStart(theme)
+    onStart(difficulty, theme)
   }
 
   const startDisabled = themeKind === 'custom' && customIds.length === 0
@@ -42,11 +59,25 @@ export function AdventureSetupScreen({ onStart, onContinue }: AdventureSetupScre
         <button className="continue-card" onClick={() => onContinue(save)}>
           <span className="continue-title">Continue your run</span>
           <span className="continue-detail">
-            Level {save.level}/{save.config.levelCount} · {save.lives}{' '}
-            {save.lives === 1 ? 'life' : 'lives'} · ${save.coins}
+            {DIFFICULTY_LABELS[save.difficulty]} · Level {save.level}/{save.config.levelCount} ·{' '}
+            {save.lives} {save.lives === 1 ? 'life' : 'lives'} · ${save.coins}
           </span>
         </button>
       )}
+
+      <h3 className="setup-heading">Difficulty</h3>
+      <div className="chip-row">
+        {(['easy', 'normal', 'hard'] as const).map((d) => (
+          <button
+            key={d}
+            className={`chip${difficulty === d ? ' chip-selected' : ''}`}
+            onClick={() => setDifficulty(d)}
+          >
+            <span className="chip-label">{DIFFICULTY_LABELS[d]}</span>
+            <span className="chip-blurb">{difficultyBlurb(d)}</span>
+          </button>
+        ))}
+      </div>
 
       <h3 className="setup-heading">Categories</h3>
       <div className="chip-row">

@@ -10,6 +10,7 @@ import type { StorageLike } from './highScores'
 const STORAGE_KEY = 'wordventure.adventure.run'
 
 const PHASES = ['loading', 'playing', 'level-won', 'revived', 'run-over', 'victory']
+const DIFFICULTIES = ['easy', 'normal', 'hard']
 
 function defaultStorage(): StorageLike | null {
   try {
@@ -34,6 +35,8 @@ function isValidRun(value: unknown): value is AdventureRunState {
     typeof run.input === 'string' &&
     typeof run.phase === 'string' &&
     PHASES.includes(run.phase) &&
+    typeof run.difficulty === 'string' &&
+    DIFFICULTIES.includes(run.difficulty) &&
     typeof config === 'object' &&
     config !== null &&
     typeof config.levelCount === 'number' &&

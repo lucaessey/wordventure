@@ -14,7 +14,16 @@
   },
   "adventure": {
     "levelCount": 25,
-    "startingLives": 4,
+    "startingLives": {
+      "easy": 6,
+      "normal": 6,
+      "hard": 4
+    },
+    "startingPerks": {
+      "easy": { "perkA": 1 },
+      "normal": {},
+      "hard": {}
+    },
     "bossLevels": {
       "5": 10,
       "10": 11,

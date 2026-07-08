@@ -125,9 +125,12 @@ export default function App() {
       )}
       {screen.name === 'adventure-setup' && (
         <AdventureSetupScreen
-          onStart={(theme) => {
+          onStart={(difficulty, theme) => {
             setRunNonce((n) => n + 1)
-            setScreen({ name: 'adventure-run', run: startAdventureRun(theme, CATEGORY_OPTIONS) })
+            setScreen({
+              name: 'adventure-run',
+              run: startAdventureRun(difficulty, theme, CATEGORY_OPTIONS),
+            })
           }}
           onContinue={(run) => {
             setRunNonce((n) => n + 1)
@@ -142,9 +145,10 @@ export default function App() {
           onHome={() => setScreen({ name: 'home' })}
           onNewRun={() => {
             setRunNonce((n) => n + 1)
+            // Retry keeps the same difficulty as the run that just ended
             setScreen({
               name: 'adventure-run',
-              run: startAdventureRun(screen.run.theme, CATEGORY_OPTIONS),
+              run: startAdventureRun(screen.run.difficulty, screen.run.theme, CATEGORY_OPTIONS),
             })
           }}
         />

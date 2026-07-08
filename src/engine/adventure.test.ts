@@ -24,10 +24,15 @@ export const TEST_SHOP: AdventureConfig['shop'] = {
   perkB: { price: 60, upgradePrice: 80, guessThreshold: 3, upgradedGuessThreshold: 4 },
 }
 
+/** Shared per-difficulty start for test configs: 4 lives all round, no free perks. */
+export const TEST_STARTING_LIVES: AdventureConfig['startingLives'] = { easy: 4, normal: 4, hard: 4 }
+export const TEST_STARTING_PERKS: AdventureConfig['startingPerks'] = { easy: {}, normal: {}, hard: {} }
+
 // Small campaign: 4 levels, boss at 3 (length 5). Non-boss lengths 3, 3, 4.
 const CONFIG: AdventureConfig = {
   levelCount: 4,
-  startingLives: 4,
+  startingLives: TEST_STARTING_LIVES,
+  startingPerks: TEST_STARTING_PERKS,
   bossLevels: { '3': 5 },
   nonBossRamp: [3, 3, 4],
   rewards: { level: 10, boss: 50 },
@@ -70,8 +75,8 @@ const DICTIONARY: Record<number, string[]> = {
 
 const CATEGORY_DATA: Record<string, Category> = { animals: ANIMALS, original: ORIGINAL }
 
-function playing(lives = CONFIG.startingLives): AdventureRunState {
-  let state = startRun({ kind: 'fixed', categoryId: 'animals' }, CATEGORIES, CONFIG, () => 0)
+function playing(lives = CONFIG.startingLives.hard): AdventureRunState {
+  let state = startRun('hard', { kind: 'fixed', categoryId: 'animals' }, CATEGORIES, CONFIG, () => 0)
   state = { ...state, lives }
   return beginLevel(state, ANIMALS, () => 0) // answer: CAT
 }
@@ -123,8 +128,46 @@ describe('campaign structure', () => {
   })
 
   it('starts with configured lives, no coins, loading phase', () => {
-    const state = startRun({ kind: 'random' }, CATEGORIES, CONFIG, () => 0)
-    expect(state).toMatchObject({ level: 1, lives: 4, coins: 0, phase: 'loading' })
+    const state = startRun('hard', { kind: 'random' }, CATEGORIES, CONFIG, () => 0)
+    expect(state).toMatchObject({ level: 1, lives: 4, coins: 0, phase: 'loading', difficulty: 'hard' })
+  })
+})
+
+describe('difficulty', () => {
+  // A config with the real per-difficulty starts: Easy/Normal 6, Hard 4; Easy free Perk A.
+  const DIFF_CONFIG: AdventureConfig = {
+    ...CONFIG,
+    startingLives: { easy: 6, normal: 6, hard: 4 },
+    startingPerks: { easy: { perkA: 1 }, normal: {}, hard: {} },
+  }
+
+  it('seeds per-difficulty starting lives', () => {
+    expect(startRun('easy', { kind: 'random' }, CATEGORIES, DIFF_CONFIG, () => 0).lives).toBe(6)
+    expect(startRun('normal', { kind: 'random' }, CATEGORIES, DIFF_CONFIG, () => 0).lives).toBe(6)
+    expect(startRun('hard', { kind: 'random' }, CATEGORIES, DIFF_CONFIG, () => 0).lives).toBe(4)
+  })
+
+  it('Easy begins owning Perk A at base tier, consuming no slot', () => {
+    const easy = startRun('easy', { kind: 'random' }, CATEGORIES, DIFF_CONFIG, () => 0)
+    expect(easy.shop.perkA).toBe(1)
+    expect(easy.shop.permanentSlots).toBe(0)
+    expect(easy.difficulty).toBe('easy')
+  })
+
+  it('Normal and Hard begin with no perks', () => {
+    expect(startRun('normal', { kind: 'random' }, CATEGORIES, DIFF_CONFIG, () => 0).shop.perkA).toBe(0)
+    expect(startRun('hard', { kind: 'random' }, CATEGORIES, DIFF_CONFIG, () => 0).shop.perkA).toBe(0)
+  })
+
+  it("Easy's free Perk A pays +1 life on the first level win", () => {
+    let easy = startRun('easy', { kind: 'fixed', categoryId: 'animals' }, CATEGORIES, DIFF_CONFIG, () => 0)
+    easy = beginLevel(easy, ANIMALS, () => 0) // answer CAT, lives 6
+    let s = easy
+    for (const letter of 'CAT') s = addLetter(s, letter)
+    const won = submitGuess(s, DICTIONARY[3], ANIMALS.wordsByLength['3']).state
+    // 6 lives - 1 guess + 1 perk life
+    expect(won.lives).toBe(6)
+    expect(won.phase).toBe('level-won')
   })
 })
 
@@ -198,7 +241,7 @@ describe('coins and progression', () => {
 
   it('is deterministic under a seeded RNG', () => {
     const run = () => {
-      const s = startRun({ kind: 'random' }, CATEGORIES, CONFIG, () => 0.5)
+      const s = startRun('hard', { kind: 'random' }, CATEGORIES, CONFIG, () => 0.5)
       return beginLevel(s, CATEGORY_DATA[s.categoryId], () => 0.5).answer
     }
     expect(run()).toBe(run())
@@ -207,7 +250,7 @@ describe('coins and progression', () => {
 
 describe('beginLevel restore behavior', () => {
   it('keeps a restored answer instead of re-rolling', () => {
-    let state = startRun({ kind: 'fixed', categoryId: 'animals' }, CATEGORIES, CONFIG, () => 0)
+    let state = startRun('hard', { kind: 'fixed', categoryId: 'animals' }, CATEGORIES, CONFIG, () => 0)
     state = { ...state, answer: 'DOG', guesses: [{ word: 'CAT', feedback: ['gray', 'yellow', 'gray'] }] }
     const resumed = beginLevel(state, ANIMALS, () => 0)
     expect(resumed.answer).toBe('DOG')

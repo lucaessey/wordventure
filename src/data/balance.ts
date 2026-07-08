@@ -26,8 +26,18 @@ export interface Balance {
   adventure: {
     /** Campaign length. */
     levelCount: number
-    /** Lives at the start of a run — lives ARE guesses. */
-    startingLives: number
+    /** Lives at the start of a run, per difficulty — lives ARE guesses. */
+    startingLives: {
+      easy: number
+      normal: number
+      hard: number
+    }
+    /** Perk tiers a difficulty starts owning for free (no slot consumed). */
+    startingPerks: {
+      easy: { perkA?: number; perkB?: number }
+      normal: { perkA?: number; perkB?: number }
+      hard: { perkA?: number; perkB?: number }
+    }
     /** Boss level number → word length. Design-fixed; do not retune casually. */
     bossLevels: Record<string, number>
     /** Word lengths for the non-boss levels in campaign order. Tune in playtesting. */

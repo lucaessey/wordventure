@@ -5,9 +5,19 @@ import { selectAnswer } from './selectAnswer'
 import { validateGuess } from './validateGuess'
 import type { Category, ScoredGuess } from './types'
 
+/**
+ * Adventure's own difficulty set — deliberately distinct from Infinite's
+ * `Difficulty` (`easy | medium | hard`): the middle tier differs and the two
+ * modes' difficulties mean different things.
+ */
+export type AdventureDifficulty = 'easy' | 'normal' | 'hard'
+
 export interface AdventureConfig {
   levelCount: number
-  startingLives: number
+  /** Starting lives per difficulty — lives ARE guesses. */
+  startingLives: Record<AdventureDifficulty, number>
+  /** Perk tiers a difficulty starts owning for free (no slot consumed). */
+  startingPerks: Record<AdventureDifficulty, { perkA?: number; perkB?: number }>
   /** Boss level number (as string key) → word length. */
   bossLevels: Record<string, number>
   /** Word lengths for the non-boss levels in campaign order. */
@@ -85,6 +95,8 @@ export type AdventurePhase = 'loading' | 'playing' | 'level-won' | 'revived' | '
  */
 export interface AdventureRunState {
   config: AdventureConfig
+  /** Locked for the run; stored in the save. */
+  difficulty: AdventureDifficulty
   theme: CategoryTheme
   /** 1-based level number. */
   level: number
@@ -117,16 +129,24 @@ export function lengthForLevel(config: AdventureConfig, level: number): number {
 }
 
 export function startRun(
+  difficulty: AdventureDifficulty,
   theme: CategoryTheme,
   categories: readonly CategoryOption[],
   config: AdventureConfig = balance.adventure,
   rng: () => number = Math.random,
 ): AdventureRunState {
+  // Easy starts owning a free perk (no slot consumed) — seed it into the shop
+  // so every existing win-trigger and upgrade path applies unchanged.
+  const starting = config.startingPerks[difficulty]
+  const shop = emptyShop()
+  if (starting.perkA) shop.perkA = starting.perkA as PerkLevel
+  if (starting.perkB) shop.perkB = starting.perkB as PerkLevel
   return {
     config,
+    difficulty,
     theme,
     level: 1,
-    lives: config.startingLives,
+    lives: config.startingLives[difficulty],
     coins: 0,
     lastReward: 0,
     categoryId: pickLevelCategory(theme, lengthForLevel(config, 1), categories, rng),
@@ -134,7 +154,7 @@ export function startRun(
     guesses: [],
     input: '',
     phase: 'loading',
-    shop: emptyShop(),
+    shop,
   }
 }
 

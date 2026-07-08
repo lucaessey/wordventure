@@ -259,6 +259,11 @@ button {
   color: var(--text-dim);
 }
 
+.run-difficulty {
+  color: var(--text);
+  font-weight: 700;
+}
+
 .run-category {
   font-weight: 700;
   overflow: hidden;

@@ -8,7 +8,7 @@ import {
   type AdventureConfig,
   type AdventureRunState,
 } from './adventure'
-import { TEST_SHOP } from './adventure.test'
+import { TEST_SHOP, TEST_STARTING_LIVES, TEST_STARTING_PERKS } from './adventure.test'
 import {
   buyInsurance,
   buyLife,
@@ -23,7 +23,8 @@ import {
 // 6 levels, boss at 3. Non-boss lengths all 3 for simple fixtures.
 const CONFIG: AdventureConfig = {
   levelCount: 6,
-  startingLives: 4,
+  startingLives: TEST_STARTING_LIVES,
+  startingPerks: TEST_STARTING_PERKS,
   bossLevels: { '3': 5 },
   nonBossRamp: [3, 3, 3, 3, 3],
   rewards: { level: 10, boss: 50 },
@@ -36,6 +37,7 @@ const DICTIONARY = ['CAT', 'DOG', 'FOX', 'RAT', 'BAT']
 function baseState(overrides: Partial<AdventureRunState> = {}): AdventureRunState {
   return {
     config: CONFIG,
+    difficulty: 'hard',
     theme: { kind: 'random' },
     level: 1,
     lives: 2,
@@ -205,6 +207,24 @@ describe('permanent upgrades', () => {
     expect(upgradePerk(notOwned, 'B')).toBe(notOwned)
   })
 
+  it("buying Perk A is a no-op when it is already owned (e.g. Easy's free perk)", () => {
+    // Easy-style start: Perk A owned, no slot spent
+    const easyStart = baseState({ difficulty: 'easy', shop: { ...emptyShop(), perkA: 1 } })
+    expect(buyPerk(easyStart, 'A')).toBe(easyStart)
+  })
+
+  it("upgrading Easy's free Perk A still needs a boss slot and $80", () => {
+    // No slot yet → upgrade unavailable despite plenty of coins
+    const noSlot = baseState({ difficulty: 'easy', coins: 1000, shop: { ...emptyShop(), perkA: 1 } })
+    expect(upgradePerk(noSlot, 'A')).toBe(noSlot)
+    // After a boss (one slot) with $80 → upgrade goes through normally
+    const withSlot = baseState({ difficulty: 'easy', shop: { ...emptyShop(), perkA: 1, permanentSlots: 1 } })
+    const upgraded = upgradePerk(withSlot, 'A')
+    expect(upgraded.shop.perkA).toBe(2)
+    expect(upgraded.shop.permanentSlots).toBe(0)
+    expect(upgraded.coins).toBe(100 - TEST_SHOP.perkA.upgradePrice)
+  })
+
   it('Perk A pays lives on a level win', () => {
     const perked = playing({ shop: { ...emptyShop(), perkA: 2 } })
     const { state } = guess(perked, 'CAT')
@@ -295,8 +315,8 @@ describe('hint state lifecycle', () => {
     expect(advanced.shop.hintCredits).toBe(2)
   })
 
-  it('startRun seeds an empty shop', () => {
-    const run = startRun({ kind: 'random' }, CATEGORIES, CONFIG, () => 0)
+  it('startRun on Normal/Hard seeds an empty shop', () => {
+    const run = startRun('hard', { kind: 'random' }, CATEGORIES, CONFIG, () => 0)
     expect(run.shop).toEqual(emptyShop())
   })
 })

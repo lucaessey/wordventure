@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { clearRun, loadRun, saveRun } from './adventureSave'
 import { startRun, submitGuess, addLetter, beginLevel } from '../engine/adventure'
-import { TEST_SHOP } from '../engine/adventure.test'
+import { TEST_SHOP, TEST_STARTING_LIVES, TEST_STARTING_PERKS } from '../engine/adventure.test'
 import type { StorageLike } from './highScores'
 import type { Category } from '../engine/types'
 
@@ -29,11 +29,13 @@ const ANIMALS: Category = {
 
 function midPuzzleRun() {
   let run = startRun(
+    'hard',
     { kind: 'fixed', categoryId: 'animals' },
     [{ id: 'animals', lengths: [3] }, { id: 'original', lengths: [3] }],
     {
       levelCount: 4,
-      startingLives: 4,
+      startingLives: TEST_STARTING_LIVES,
+      startingPerks: TEST_STARTING_PERKS,
       bossLevels: { '3': 5 },
       nonBossRamp: [3, 3, 4],
       rewards: { level: 10, boss: 50 },
@@ -97,6 +99,19 @@ describe('adventure save', () => {
 
   it('rejects a pre-shop save (no shop field)', () => {
     const { shop: _shop, ...oldSave } = midPuzzleRun()
+    const { storage } = memoryStorage({ 'wordventure.adventure.run': JSON.stringify(oldSave) })
+    expect(loadRun(storage)).toBeNull()
+  })
+
+  it('preserves difficulty across a round-trip', () => {
+    const { storage } = memoryStorage()
+    const run = { ...midPuzzleRun(), difficulty: 'easy' as const }
+    saveRun(run, storage)
+    expect(loadRun(storage)?.difficulty).toBe('easy')
+  })
+
+  it('rejects a pre-difficulty save (no difficulty field)', () => {
+    const { difficulty: _difficulty, ...oldSave } = midPuzzleRun()
     const { storage } = memoryStorage({ 'wordventure.adventure.run': JSON.stringify(oldSave) })
     expect(loadRun(storage)).toBeNull()
   })

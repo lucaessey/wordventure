@@ -10,6 +10,7 @@ import {
   removeLetter,
   resumePlay,
   submitGuess,
+  type AdventureDifficulty,
   type AdventureRunState,
 } from '../engine/adventure'
 import {
@@ -42,6 +43,12 @@ interface AdventureRunScreenProps {
 const REJECTION_MESSAGES = {
   'not-in-word-list': 'Not in word list',
   'wrong-length': 'Not enough letters',
+}
+
+const DIFFICULTY_LABELS: Record<AdventureDifficulty, string> = {
+  easy: 'Easy',
+  normal: 'Normal',
+  hard: 'Hard',
 }
 
 const CATEGORY_OPTIONS: CategoryOption[] = categories.map(({ id, lengths }) => ({ id, lengths }))
@@ -216,8 +223,9 @@ export function AdventureRunScreen({ initialRun, onHome, onNewRun }: AdventureRu
     <div className="game">
       <div className="run-strip">
         <span className="run-level">
-          {boss && <span className="boss-badge">BOSS</span>} Level {run.level}/
-          {run.config.levelCount}
+          {boss && <span className="boss-badge">BOSS</span>}
+          <span className="run-difficulty">{DIFFICULTY_LABELS[run.difficulty]}</span> · Level{' '}
+          {run.level}/{run.config.levelCount}
         </span>
         <span className="run-category">{categoryName}</span>
         <span className="run-badges">
