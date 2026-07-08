@@ -21,4 +21,4 @@
 
 - [x] 4.1 `npm test` green and `npm run build` clean
 - [x] 4.2 Manual preview pass (crafted saves where grinding is impractical): buy lives; use all three hint types and confirm keyboard/strip effects and no-repeat targeting; skip a level and see perk triggers without coins; insurance full cycle — buy at $10, premium each level, lapse when broke, die covered → revive → rebuy at $20; boss win grants a slot; buy and upgrade both perks; resume a save mid-run with shop state intact
-- [ ] 4.3 Push to GitHub, verify the deployed app, and confirm a full campaign is now realistically winnable (playtesting begins)
+- [x] 4.3 Push to GitHub, verify the deployed app, and confirm a full campaign is now realistically winnable (playtesting begins)
