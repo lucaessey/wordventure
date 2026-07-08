@@ -9,7 +9,7 @@ import type { StorageLike } from './highScores'
 
 const STORAGE_KEY = 'wordventure.adventure.run'
 
-const PHASES = ['loading', 'playing', 'level-won', 'run-over', 'victory']
+const PHASES = ['loading', 'playing', 'level-won', 'revived', 'run-over', 'victory']
 
 function defaultStorage(): StorageLike | null {
   try {
@@ -39,7 +39,31 @@ function isValidRun(value: unknown): value is AdventureRunState {
     typeof config.levelCount === 'number' &&
     Array.isArray(config.nonBossRamp) &&
     typeof run.theme === 'object' &&
-    run.theme !== null
+    run.theme !== null &&
+    isValidShop(run.shop)
+  )
+}
+
+function isValidShop(value: unknown): boolean {
+  if (typeof value !== 'object' || value === null) return false
+  const shop = value as Record<string, unknown>
+  const insurance = shop.insurance as Record<string, unknown> | undefined
+  const hints = shop.hints as Record<string, unknown> | undefined
+  return (
+    typeof insurance === 'object' &&
+    insurance !== null &&
+    typeof insurance.owned === 'boolean' &&
+    typeof insurance.covered === 'boolean' &&
+    typeof insurance.everUsed === 'boolean' &&
+    typeof shop.permanentSlots === 'number' &&
+    typeof shop.perkA === 'number' &&
+    typeof shop.perkB === 'number' &&
+    typeof shop.hintCredits === 'number' &&
+    typeof hints === 'object' &&
+    hints !== null &&
+    Array.isArray(hints.revealed) &&
+    Array.isArray(hints.contained) &&
+    Array.isArray(hints.eliminated)
   )
 }
 

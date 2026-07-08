@@ -15,6 +15,15 @@ import { balance } from '../data/balance'
 import type { CategoryOption } from './categoryTheme'
 import type { Category } from './types'
 
+export const TEST_SHOP: AdventureConfig['shop'] = {
+  lifePrice: 3,
+  hintPrice: 6,
+  skipPrice: 50,
+  insurance: { firstPrice: 10, rebuyPrice: 20, premium: 2, reviveLives: 4 },
+  perkA: { price: 60, upgradePrice: 80, livesPerLevel: 1, upgradedLivesPerLevel: 2 },
+  perkB: { price: 60, upgradePrice: 80, guessThreshold: 3, upgradedGuessThreshold: 4 },
+}
+
 // Small campaign: 4 levels, boss at 3 (length 5). Non-boss lengths 3, 3, 4.
 const CONFIG: AdventureConfig = {
   levelCount: 4,
@@ -22,6 +31,7 @@ const CONFIG: AdventureConfig = {
   bossLevels: { '3': 5 },
   nonBossRamp: [3, 3, 4],
   rewards: { level: 10, boss: 50 },
+  shop: TEST_SHOP,
 }
 
 const CATEGORIES: CategoryOption[] = [

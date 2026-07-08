@@ -37,4 +37,16 @@ describe('balance', () => {
       expect(length).toBeLessThanOrEqual(14)
     }
   })
+
+  it('exposes a consistent Adventure shop shape', () => {
+    const { lifePrice, hintPrice, skipPrice, insurance, perkA, perkB } = balance.adventure.shop
+    for (const price of [lifePrice, hintPrice, skipPrice]) {
+      expect(price).toBeGreaterThan(0)
+    }
+    expect(insurance.rebuyPrice).toBeGreaterThan(insurance.firstPrice)
+    expect(insurance.premium).toBeGreaterThan(0)
+    expect(insurance.reviveLives).toBeGreaterThan(0)
+    expect(perkA.upgradedLivesPerLevel).toBeGreaterThan(perkA.livesPerLevel)
+    expect(perkB.upgradedGuessThreshold).toBeGreaterThan(perkB.guessThreshold)
+  })
 })

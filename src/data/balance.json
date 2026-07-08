@@ -26,6 +26,29 @@
     "rewards": {
       "level": 10,
       "boss": 50
+    },
+    "shop": {
+      "lifePrice": 3,
+      "hintPrice": 6,
+      "skipPrice": 50,
+      "insurance": {
+        "firstPrice": 10,
+        "rebuyPrice": 20,
+        "premium": 2,
+        "reviveLives": 4
+      },
+      "perkA": {
+        "price": 60,
+        "upgradePrice": 80,
+        "livesPerLevel": 1,
+        "upgradedLivesPerLevel": 2
+      },
+      "perkB": {
+        "price": 60,
+        "upgradePrice": 80,
+        "guessThreshold": 3,
+        "upgradedGuessThreshold": 4
+      }
     }
   }
 }

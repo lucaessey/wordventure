@@ -37,6 +37,33 @@ export interface Balance {
       level: number
       boss: number
     }
+    shop: {
+      lifePrice: number
+      hintPrice: number
+      skipPrice: number
+      insurance: {
+        /** First purchase in a run, before any policy has been consumed. */
+        firstPrice: number
+        /** Repurchase price after a policy has been consumed this run. */
+        rebuyPrice: number
+        /** Charged as each level begins while a policy is owned. */
+        premium: number
+        /** Lives granted by a covered revive. */
+        reviveLives: number
+      }
+      perkA: {
+        price: number
+        upgradePrice: number
+        livesPerLevel: number
+        upgradedLivesPerLevel: number
+      }
+      perkB: {
+        price: number
+        upgradePrice: number
+        guessThreshold: number
+        upgradedGuessThreshold: number
+      }
+    }
   }
 }
 

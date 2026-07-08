@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { clearRun, loadRun, saveRun } from './adventureSave'
 import { startRun, submitGuess, addLetter, beginLevel } from '../engine/adventure'
+import { TEST_SHOP } from '../engine/adventure.test'
 import type { StorageLike } from './highScores'
 import type { Category } from '../engine/types'
 
@@ -36,6 +37,7 @@ function midPuzzleRun() {
       bossLevels: { '3': 5 },
       nonBossRamp: [3, 3, 4],
       rewards: { level: 10, boss: 50 },
+      shop: TEST_SHOP,
     },
     () => 0,
   )
@@ -67,6 +69,35 @@ describe('adventure save', () => {
     const { storage } = memoryStorage({
       'wordventure.adventure.run': JSON.stringify({ level: 'three', lives: 2 }),
     })
+    expect(loadRun(storage)).toBeNull()
+  })
+
+  it('round-trips shop state exactly', () => {
+    const { storage } = memoryStorage()
+    const base = midPuzzleRun()
+    const run = {
+      ...base,
+      coins: 47,
+      shop: {
+        insurance: { owned: true, covered: true, everUsed: true },
+        permanentSlots: 1,
+        perkA: 2 as const,
+        perkB: 1 as const,
+        hintCredits: 3,
+        hints: {
+          revealed: [{ position: 1, letter: 'A' }],
+          contained: ['T'],
+          eliminated: ['Q', 'Z'],
+        },
+      },
+    }
+    saveRun(run, storage)
+    expect(loadRun(storage)).toEqual(run)
+  })
+
+  it('rejects a pre-shop save (no shop field)', () => {
+    const { shop: _shop, ...oldSave } = midPuzzleRun()
+    const { storage } = memoryStorage({ 'wordventure.adventure.run': JSON.stringify(oldSave) })
     expect(loadRun(storage)).toBeNull()
   })
 

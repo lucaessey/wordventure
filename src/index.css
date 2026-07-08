@@ -366,6 +366,115 @@ button {
   font-style: italic;
 }
 
+/* --- Adventure shop ----------------------------------------------------------- */
+
+.shield {
+  font-size: 1rem;
+}
+
+.shield-lapsed {
+  opacity: 0.35;
+  filter: grayscale(1);
+}
+
+.hint-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+  padding: 6px 4px 0;
+}
+
+.hint-chip {
+  background: var(--surface-raised);
+  border: 1px solid var(--yellow);
+  color: var(--text);
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 999px;
+}
+
+.hint-button {
+  align-self: center;
+  margin: 4px 0;
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--text);
+  font-size: 0.85rem;
+  font-weight: 700;
+  padding: 7px 16px;
+}
+
+.hint-button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.hint-options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.hint-option:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.shop-panel {
+  max-height: 85dvh;
+  overflow-y: auto;
+  min-width: min(90vw, 340px);
+}
+
+.shop-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+  text-align: left;
+}
+
+.shop-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-size: 0.85rem;
+  padding: 10px 12px;
+}
+
+.shop-row:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.shop-row-status {
+  border-style: dashed;
+  color: var(--text-dim);
+}
+
+.shop-price {
+  font-weight: 700;
+  color: var(--yellow);
+  white-space: nowrap;
+}
+
+.shop-section {
+  margin-top: 6px;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-dim);
+}
+
 @keyframes pulse {
   50% {
     transform: scale(1.08);

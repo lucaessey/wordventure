@@ -16,9 +16,67 @@ export interface AdventureConfig {
     level: number
     boss: number
   }
+  shop: {
+    lifePrice: number
+    hintPrice: number
+    skipPrice: number
+    insurance: {
+      firstPrice: number
+      rebuyPrice: number
+      premium: number
+      reviveLives: number
+    }
+    perkA: {
+      price: number
+      upgradePrice: number
+      livesPerLevel: number
+      upgradedLivesPerLevel: number
+    }
+    perkB: {
+      price: number
+      upgradePrice: number
+      guessThreshold: number
+      upgradedGuessThreshold: number
+    }
+  }
 }
 
-export type AdventurePhase = 'loading' | 'playing' | 'level-won' | 'run-over' | 'victory'
+/** 0 = not owned, 1 = bought, 2 = upgraded. */
+export type PerkLevel = 0 | 1 | 2
+
+export interface ShopState {
+  insurance: {
+    owned: boolean
+    /** Premium paid for the current level — a covered death revives. */
+    covered: boolean
+    /** A policy has been consumed this run — repurchases cost the rebuy price. */
+    everUsed: boolean
+  }
+  /** Unspent permanent-upgrade slots (one per boss beaten). */
+  permanentSlots: number
+  perkA: PerkLevel
+  perkB: PerkLevel
+  hintCredits: number
+  /** Hint effects for the current level; cleared on advance. */
+  hints: {
+    revealed: Array<{ position: number; letter: string }>
+    contained: string[]
+    eliminated: string[]
+  }
+}
+
+export function emptyShop(): ShopState {
+  return {
+    insurance: { owned: false, covered: false, everUsed: false },
+    permanentSlots: 0,
+    perkA: 0,
+    perkB: 0,
+    hintCredits: 0,
+    hints: { revealed: [], contained: [], eliminated: [] },
+  }
+}
+
+export type AdventurePhase = 'loading' | 'playing' | 'level-won' | 'revived' | 'run-over' | 'victory'
 
 /**
  * Full state of an Adventure run. Deliberately plain JSON data (the RNG is
@@ -40,6 +98,7 @@ export interface AdventureRunState {
   guesses: ScoredGuess[]
   input: string
   phase: AdventurePhase
+  shop: ShopState
 }
 
 export function isBossLevel(config: AdventureConfig, level: number): boolean {
@@ -75,6 +134,32 @@ export function startRun(
     guesses: [],
     input: '',
     phase: 'loading',
+    shop: emptyShop(),
+  }
+}
+
+/** Lives granted per level beaten by Perk A at its current level. */
+export function perkALivesPerLevel(state: AdventureRunState): number {
+  const { livesPerLevel, upgradedLivesPerLevel } = state.config.shop.perkA
+  return state.shop.perkA === 2 ? upgradedLivesPerLevel : state.shop.perkA === 1 ? livesPerLevel : 0
+}
+
+/** Guess threshold for Perk B's free hint, or null when the perk is not owned. */
+export function perkBThreshold(state: AdventureRunState): number | null {
+  const { guessThreshold, upgradedGuessThreshold } = state.config.shop.perkB
+  return state.shop.perkB === 2 ? upgradedGuessThreshold : state.shop.perkB === 1 ? guessThreshold : null
+}
+
+/** Perk payouts for a level that counts as beaten with `guessesUsed` guesses. */
+export function applyPerkTriggers(state: AdventureRunState, guessesUsed: number): AdventureRunState {
+  const bonusLives = perkALivesPerLevel(state)
+  const threshold = perkBThreshold(state)
+  const bonusCredit = threshold !== null && guessesUsed <= threshold ? 1 : 0
+  if (bonusLives === 0 && bonusCredit === 0) return state
+  return {
+    ...state,
+    lives: state.lives + bonusLives,
+    shop: { ...state.shop, hintCredits: state.shop.hintCredits + bonusCredit },
   }
 }
 
@@ -142,26 +227,63 @@ export function submitGuess(
   const lives = state.lives - 1
 
   if (validation.word === state.answer) {
-    const reward = isBossLevel(state.config, state.level)
-      ? state.config.rewards.boss
-      : state.config.rewards.level
+    const boss = isBossLevel(state.config, state.level)
+    const reward = boss ? state.config.rewards.boss : state.config.rewards.level
     const coins = state.coins + reward
-    const phase = state.level >= state.config.levelCount ? 'victory' : 'level-won'
-    return {
-      state: { ...state, guesses, lives, coins, lastReward: reward, input: '', phase },
+    if (state.level >= state.config.levelCount) {
+      return { state: { ...state, guesses, lives, coins, lastReward: reward, input: '', phase: 'victory' } }
     }
+    let won: AdventureRunState = {
+      ...state,
+      guesses,
+      lives,
+      coins,
+      lastReward: reward,
+      input: '',
+      phase: 'level-won',
+    }
+    won = applyPerkTriggers(won, guesses.length)
+    if (boss) {
+      won = { ...won, shop: { ...won.shop, permanentSlots: won.shop.permanentSlots + 1 } }
+    }
+    return { state: won }
   }
 
   if (lives <= 0) {
-    return { state: { ...state, guesses, lives: 0, input: '', phase: 'run-over' } }
+    return { state: settleDeath({ ...state, guesses, lives: 0, input: '' }) }
   }
   return { state: { ...state, guesses, lives, input: '' } }
 }
 
+/** Death resolution: a covered policy revives on the same puzzle and is consumed. */
+function settleDeath(state: AdventureRunState): AdventureRunState {
+  const { insurance } = state.shop
+  if (insurance.owned && insurance.covered) {
+    return {
+      ...state,
+      lives: state.config.shop.insurance.reviveLives,
+      phase: 'revived',
+      shop: {
+        ...state.shop,
+        insurance: { owned: false, covered: false, everUsed: true },
+      },
+    }
+  }
+  return { ...state, phase: 'run-over' }
+}
+
+/** Dismiss the insurance-revive moment and keep playing the same puzzle. */
+export function resumePlay(state: AdventureRunState): AdventureRunState {
+  if (state.phase !== 'revived') return state
+  return { ...state, phase: 'playing' }
+}
+
 /**
  * Move from the reward moment to the next level. Lives carry over; advancing
- * with 0 lives ends the run immediately rather than presenting a puzzle that
- * cannot legally be guessed at.
+ * with 0 lives is a death (covered insurance revives, otherwise run over)
+ * rather than presenting a puzzle that cannot legally be guessed at.
+ * While a policy is owned, the premium is charged as the new level begins;
+ * an unaffordable premium lapses coverage for that level only.
  */
 export function advanceLevel(
   state: AdventureRunState,
@@ -170,12 +292,30 @@ export function advanceLevel(
 ): AdventureRunState {
   if (state.phase !== 'level-won') return state
   if (state.lives <= 0) {
-    return { ...state, phase: 'run-over' }
+    const settled = settleDeath(state)
+    if (settled.phase === 'run-over') return settled
+    // Revived mid-advance: fall through and advance with the revived lives
+    state = { ...settled, phase: 'level-won' }
   }
+
+  let shop = { ...state.shop, hints: { revealed: [], contained: [], eliminated: [] } }
+  let coins = state.coins
+  if (shop.insurance.owned) {
+    const premium = state.config.shop.insurance.premium
+    if (coins >= premium) {
+      coins -= premium
+      shop = { ...shop, insurance: { ...shop.insurance, covered: true } }
+    } else {
+      shop = { ...shop, insurance: { ...shop.insurance, covered: false } }
+    }
+  }
+
   const level = state.level + 1
   return {
     ...state,
     level,
+    coins,
+    shop,
     categoryId: pickLevelCategory(state.theme, lengthForLevel(state.config, level), categories, rng),
     answer: '',
     guesses: [],
