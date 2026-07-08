@@ -1,0 +1,67 @@
+{
+  "id": "dragon-ball",
+  "displayName": "Dragon Ball",
+  "minLetters": 3,
+  "maxLetters": 9,
+  "wordsByLength": {
+    "3": [
+      "BUU",
+      "HIT",
+      "PAN",
+      "UUB"
+    ],
+    "4": [
+      "CELL",
+      "GINE",
+      "GOKU",
+      "NAIL",
+      "PUAR",
+      "TIEN",
+      "WHIS"
+    ],
+    "5": [
+      "BROLY",
+      "BULMA",
+      "DENDE",
+      "FASHA",
+      "GOHAN",
+      "GOTEN",
+      "JIREN",
+      "MARON",
+      "NAPPA",
+      "ROSHI",
+      "VIDEL"
+    ],
+    "6": [
+      "BEERUS",
+      "CHICHI",
+      "COOLER",
+      "FRIEZA",
+      "KIBITO",
+      "MARRON",
+      "OOLONG",
+      "RADITZ",
+      "TRUNKS",
+      "TURLES",
+      "VEGETA",
+      "YAMCHA",
+      "ZARBON"
+    ],
+    "7": [
+      "BARDOCK",
+      "DODORIA",
+      "GOTENKS",
+      "HERCULE",
+      "KRILLIN",
+      "PICCOLO",
+      "SHENRON"
+    ],
+    "8": [
+      "CHIAOTZU",
+      "YAJIROBE"
+    ],
+    "9": [
+      "SPOPOVICH"
+    ]
+  }
+}

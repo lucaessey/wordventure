@@ -11,8 +11,11 @@ const LAUNCH_CATEGORY_IDS = [
   'animals',
   'brawl-stars',
   'countries',
+  'dragon-ball',
   'food',
   'minecraft',
+  'movies-tv',
+  'nintendo-switch',
   'original',
   'pokemon',
   'sports',
@@ -25,7 +28,7 @@ function readJson<T>(path: string): T {
 }
 
 describe('category data', () => {
-  it('ships exactly the eight launch categories plus the index', () => {
+  it('ships exactly the eleven launch categories plus the index', () => {
     const files = readdirSync(CATEGORIES_DIR).filter((f) => f.endsWith('.json')).sort()
     expect(files).toEqual([...LAUNCH_CATEGORY_IDS.map((id) => `${id}.json`), 'index.json'].sort())
   })
@@ -71,7 +74,7 @@ describe('category index', () => {
   }
   const index = readJson<IndexEntry[]>(join(CATEGORIES_DIR, 'index.json'))
 
-  it('lists all eight launch categories', () => {
+  it('lists all eleven launch categories', () => {
     expect(index.map((e) => e.id).sort()).toEqual(LAUNCH_CATEGORY_IDS)
   })
 
@@ -121,6 +124,24 @@ describe('Sports category', () => {
       expect(words.length).toBeGreaterThanOrEqual(1)
     }
   })
+})
+
+describe('franchise categories stay within their declared ranges', () => {
+  const ranges: Record<string, [number, number]> = {
+    'movies-tv': [4, 10],
+    'dragon-ball': [3, 10],
+    'nintendo-switch': [4, 10],
+  }
+  for (const [id, [lo, hi]] of Object.entries(ranges)) {
+    it(`${id} is single-word tokens within ${lo}-${hi}`, () => {
+      const cat = readJson<Category>(join(CATEGORIES_DIR, `${id}.json`))
+      expect(cat.minLetters).toBeGreaterThanOrEqual(lo)
+      expect(cat.maxLetters).toBeLessThanOrEqual(hi)
+      const words = Object.values(cat.wordsByLength).flat()
+      expect(words.length).toBeGreaterThan(0)
+      for (const word of words) expect(word).toMatch(/^[A-Z]+$/)
+    })
+  }
 })
 
 describe('English guess dictionary', () => {

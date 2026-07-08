@@ -1,0 +1,56 @@
+{
+  "id": "nintendo-switch",
+  "displayName": "Nintendo Switch",
+  "minLetters": 4,
+  "maxLetters": 10,
+  "wordsByLength": {
+    "4": [
+      "ARMS",
+      "LINK",
+      "TOAD"
+    ],
+    "5": [
+      "BIRDO",
+      "DAISY",
+      "DIDDY",
+      "HADES",
+      "KIRBY",
+      "KOOPA",
+      "LUIGI",
+      "MARIO",
+      "PEACH",
+      "SAMUS",
+      "WARIO",
+      "YOSHI",
+      "ZELDA"
+    ],
+    "6": [
+      "BOWSER",
+      "DONKEY",
+      "GOOMBA",
+      "PIKMIN",
+      "TETRIS"
+    ],
+    "7": [
+      "CELESTE",
+      "CUPHEAD",
+      "INKLING",
+      "KAZOOIE",
+      "METROID",
+      "PIKACHU",
+      "WALUIGI"
+    ],
+    "8": [
+      "ROSALINA",
+      "SPLATOON",
+      "TERRARIA"
+    ],
+    "9": [
+      "BAYONETTA",
+      "XENOBLADE"
+    ],
+    "10": [
+      "OVERCOOKED"
+    ]
+  }
+}

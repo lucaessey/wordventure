@@ -31,6 +31,8 @@ interface CategorySource {
   restrictTo?: ReadonlySet<string>
   /** Drop length buckets below this count. Defaults to MIN_WORDS_PER_BUCKET. */
   minWords?: number
+  /** Floor the category's word length (declared range). Defaults to MIN_LENGTH. */
+  minLength?: number
   /** Cap the category's word length (declared range). Defaults to MAX_LENGTH. */
   maxLength?: number
 }
@@ -100,6 +102,11 @@ const sources: CategorySource[] = [
   // Sports: activities not teams. Naturally small — keep every real entry
   // (minWords 1) rather than pad; declared range 3-10.
   { id: 'sports', displayName: 'Sports', file: 'sports.txt', minWords: 1, maxLength: 10 },
+  // Movies & TV, Dragon Ball, Nintendo Switch: curated single-word franchise
+  // lists. Naturally small (minWords 1); declared ranges from the details.
+  { id: 'movies-tv', displayName: 'Movies & TV', file: 'movies-tv.txt', minWords: 1, minLength: 4, maxLength: 10 },
+  { id: 'dragon-ball', displayName: 'Dragon Ball', file: 'dragon-ball.txt', minWords: 1, maxLength: 10 },
+  { id: 'nintendo-switch', displayName: 'Nintendo Switch', file: 'nintendo-switch.txt', minWords: 1, minLength: 4, maxLength: 10 },
 ]
 
 interface CategoryIndexEntry {
@@ -120,11 +127,12 @@ for (const source of sources) {
   }
 
   const minWords = source.minWords ?? MIN_WORDS_PER_BUCKET
-  const maxLength = source.maxLength ?? MAX_LENGTH
+  const minLength = Math.max(MIN_LENGTH, source.minLength ?? MIN_LENGTH)
+  const maxLength = Math.min(MAX_LENGTH, source.maxLength ?? MAX_LENGTH)
   const buckets = bucketByLength(words)
   const wordsByLength: Record<string, string[]> = {}
   const lengths: number[] = []
-  for (let length = MIN_LENGTH; length <= maxLength; length++) {
+  for (let length = minLength; length <= maxLength; length++) {
     const bucket = buckets.get(length)
     if (bucket && bucket.length >= minWords) {
       wordsByLength[String(length)] = bucket

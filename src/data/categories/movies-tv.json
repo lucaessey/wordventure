@@ -1,0 +1,77 @@
+{
+  "id": "movies-tv",
+  "displayName": "Movies & TV",
+  "minLetters": 4,
+  "maxLetters": 10,
+  "wordsByLength": {
+    "4": [
+      "ANTZ",
+      "CARS",
+      "COCO",
+      "EPIC",
+      "HUGO",
+      "IGOR",
+      "LUCA",
+      "SING",
+      "SOUL",
+      "VIVO",
+      "WISH"
+    ],
+    "5": [
+      "BAMBI",
+      "BLUEY",
+      "BRAVE",
+      "DUMBO",
+      "KLAUS",
+      "MOANA",
+      "MULAN",
+      "SCOOB",
+      "SHREK",
+      "WONKA"
+    ],
+    "6": [
+      "ARCANE",
+      "AVATAR",
+      "BARBIE",
+      "FROZEN",
+      "ONWARD",
+      "ROBOTS",
+      "SNOOPY",
+      "SPIRIT",
+      "TARZAN",
+      "TROLLS"
+    ],
+    "7": [
+      "ALADDIN",
+      "ENCANTO",
+      "MATILDA",
+      "MINIONS",
+      "MUMMIES",
+      "POKEMON",
+      "TANGLED"
+    ],
+    "8": [
+      "CORALINE",
+      "GARFIELD",
+      "HERCULES",
+      "UNDERDOG",
+      "ZOOTOPIA"
+    ],
+    "9": [
+      "ELEMENTAL",
+      "FERDINAND",
+      "MIGRATION",
+      "PINOCCHIO",
+      "RIVERDALE",
+      "SMALLFOOT",
+      "WEDNESDAY"
+    ],
+    "10": [
+      "CINDERELLA",
+      "HOODWINKED",
+      "MADAGASCAR",
+      "PADDINGTON",
+      "POCAHONTAS"
+    ]
+  }
+}

@@ -14,9 +14,12 @@ Wordventure is a Wordle-derived progressive web app, built as a father-son proje
 ## Word data model
 
 - Each category file: `{ id, displayName, minLetters, maxLetters, wordsByLength: { "4": [...], "5": [...] } }`.
-- Launch categories: Original, Pokemon, Minecraft, Brawl Stars, Animals, Countries, Food, Sports. Each category has its own letter range based on what its word list can support (e.g., Brawl Stars might be 4–8; Original 4–14).
+- Launch categories: Original, Pokemon, Minecraft, Brawl Stars, Animals, Countries, Food, Sports, Movies & TV, Dragon Ball, Nintendo Switch. Each category has its own letter range based on what its word list can support (e.g., Brawl Stars might be 4–8; Original 4–14).
   - Food: broad mix of foods, dishes, fruits, vegetables, and snacks; generic only, no brands. Range 3–10 letters, 20+ words per length. Multi-word dishes are normalized to letters-only (e.g. HOTDOG) or excluded.
   - Sports: the activities themselves (SKI, GOLF, RUGBY, SOCCER, HOCKEY, LACROSSE), not teams. Naturally small; declared range 3–10, including every real entry rather than padding with obscure ones.
+  - Movies & TV: single-word titles kids/teens actually recognize (FROZEN, MOANA, ENCANTO, BLUEY, WEDNESDAY, POKEMON). Skip multi-word titles rather than mashing them together. Range 4–10; naturally smaller — include real recognizable titles rather than padding with obscure films.
+  - Dragon Ball: character names (GOKU, VEGETA, GOHAN, PICCOLO, FRIEZA, TRUNKS, CELL, BROLY, KRILLIN, BULMA). Range 3–10, 15+ per length where the source allows.
+  - Nintendo Switch: Switch game titles and franchises as single words (MARIO, ZELDA, KIRBY, SPLATOON, METROID, PIKMIN, BAYONETTA). Single-word entries only. Range 4–10.
 - A shared English guess dictionary, bucketed by length (3–14 letters), from a public-domain word list.
 - Valid guess rule (all modes): a guess is valid if it appears in the English dictionary OR the active category's word list (union). Invalid guesses are rejected with a "not in word list" shake and do not consume a guess/life.
 - Answers are always drawn from the active category's list.
