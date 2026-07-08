@@ -107,6 +107,8 @@ const sources: CategorySource[] = [
   { id: 'movies-tv', displayName: 'Movies & TV', file: 'movies-tv.txt', minWords: 1, minLength: 4, maxLength: 10 },
   { id: 'dragon-ball', displayName: 'Dragon Ball', file: 'dragon-ball.txt', minWords: 1, maxLength: 10 },
   { id: 'nintendo-switch', displayName: 'Nintendo Switch', file: 'nintendo-switch.txt', minWords: 1, minLength: 4, maxLength: 10 },
+  // Music: single-word artist names and song titles mixed. Curated, small buckets ok.
+  { id: 'music', displayName: 'Music', file: 'music.txt', minWords: 1, maxLength: 10 },
 ]
 
 interface CategoryIndexEntry {

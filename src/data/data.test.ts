@@ -15,6 +15,7 @@ const LAUNCH_CATEGORY_IDS = [
   'food',
   'minecraft',
   'movies-tv',
+  'music',
   'nintendo-switch',
   'original',
   'pokemon',
@@ -28,7 +29,7 @@ function readJson<T>(path: string): T {
 }
 
 describe('category data', () => {
-  it('ships exactly the eleven launch categories plus the index', () => {
+  it('ships exactly the twelve launch categories plus the index', () => {
     const files = readdirSync(CATEGORIES_DIR).filter((f) => f.endsWith('.json')).sort()
     expect(files).toEqual([...LAUNCH_CATEGORY_IDS.map((id) => `${id}.json`), 'index.json'].sort())
   })
@@ -74,7 +75,7 @@ describe('category index', () => {
   }
   const index = readJson<IndexEntry[]>(join(CATEGORIES_DIR, 'index.json'))
 
-  it('lists all eleven launch categories', () => {
+  it('lists all twelve launch categories', () => {
     expect(index.map((e) => e.id).sort()).toEqual(LAUNCH_CATEGORY_IDS)
   })
 
@@ -131,6 +132,7 @@ describe('franchise categories stay within their declared ranges', () => {
     'movies-tv': [4, 10],
     'dragon-ball': [3, 10],
     'nintendo-switch': [4, 10],
+    music: [3, 10],
   }
   for (const [id, [lo, hi]] of Object.entries(ranges)) {
     it(`${id} is single-word tokens within ${lo}-${hi}`, () => {

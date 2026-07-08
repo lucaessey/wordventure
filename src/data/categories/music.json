@@ -1,0 +1,92 @@
+{
+  "id": "music",
+  "displayName": "Music",
+  "minLetters": 3,
+  "maxLetters": 10,
+  "wordsByLength": {
+    "3": [
+      "SIA"
+    ],
+    "4": [
+      "ABBA",
+      "AKON",
+      "BECK",
+      "CHER",
+      "DIDO",
+      "ENYA",
+      "HALO",
+      "MOBY",
+      "MUSE",
+      "PINK",
+      "ROAR",
+      "SADE",
+      "SEAL",
+      "STAY"
+    ],
+    "5": [
+      "ADELE",
+      "CIARA",
+      "DRAKE",
+      "HAPPY",
+      "HELLO",
+      "KESHA",
+      "LIZZO",
+      "LORDE",
+      "NELLY",
+      "QUEEN",
+      "SORRY",
+      "STING",
+      "USHER",
+      "VOGUE"
+    ],
+    "6": [
+      "BRANDY",
+      "EAGLES",
+      "EMINEM",
+      "FERGIE",
+      "HALSEY",
+      "HOZIER",
+      "HUMBLE",
+      "KANSAS",
+      "MONICA",
+      "PRINCE",
+      "ROYALS",
+      "WEEKND"
+    ],
+    "7": [
+      "AALIYAH",
+      "ASHANTI",
+      "CHICAGO",
+      "FLOWERS",
+      "GENESIS",
+      "IMAGINE",
+      "JOURNEY",
+      "MADONNA",
+      "NIRVANA",
+      "OUTKAST",
+      "PERFECT",
+      "RESPECT",
+      "RIHANNA",
+      "SANTANA",
+      "SHAKIRA"
+    ],
+    "8": [
+      "BELIEVER",
+      "COLDPLAY",
+      "FIREWORK",
+      "GORILLAZ",
+      "THRILLER"
+    ],
+    "9": [
+      "AEROSMITH",
+      "METALLICA",
+      "RADIOHEAD",
+      "SCORPIONS",
+      "YESTERDAY"
+    ],
+    "10": [
+      "LEVITATING",
+      "WONDERWALL"
+    ]
+  }
+}
