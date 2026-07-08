@@ -21,7 +21,7 @@ An Adventure run SHALL be a campaign of `adventure.levelCount` levels (initially
 - **THEN** the run ends as a victory
 
 ### Requirement: Lives are guesses
-A run SHALL start with `adventure.startingLives` lives (initially 4). Every valid submitted guess SHALL subtract one life; invalid guesses cost nothing. When lives reach 0 with the level unsolved, the run SHALL end unless an active insurance policy revives it (see the adventure-shop capability) — a run that ends starts over from level 1 with no checkpoints. Solving a level with the last life SHALL beat the level, but a level MUST NOT begin with 0 lives — advancing with 0 lives ends the run (or triggers a covered revive).
+A run SHALL start with the chosen difficulty's starting lives (`adventure.startingLives.easy/normal/hard`, initially 6/6/4). Every valid submitted guess SHALL subtract one life; invalid guesses cost nothing. When lives reach 0 with the level unsolved, the run SHALL end unless an active insurance policy revives it (see the adventure-shop capability) — a run that ends starts over from level 1 with no checkpoints. Solving a level with the last life SHALL beat the level, but a level MUST NOT begin with 0 lives — advancing with 0 lives ends the run (or triggers a covered revive).
 
 #### Scenario: A guess costs a life
 - **WHEN** a valid guess is submitted and it is not the answer
@@ -29,7 +29,7 @@ A run SHALL start with `adventure.startingLives` lives (initially 4). Every vali
 
 #### Scenario: Death ends the run with full restart
 - **WHEN** lives reach 0 with the level unsolved and no active insurance coverage
-- **THEN** the run ends and a new run begins at level 1 with starting lives and no carried-over coins
+- **THEN** the run ends and a new run begins at level 1 with its difficulty's starting lives and no carried-over coins
 
 #### Scenario: Last-life solve beats the level but cannot continue unaided
 - **WHEN** the player solves a level with their final life and advances with 0 lives and no active coverage
@@ -58,7 +58,7 @@ Starting a run SHALL offer: all categories mixed, one fixed category, or a custo
 - **THEN** the boss level's answer is drawn from Original
 
 ### Requirement: Save and resume
-The full run state (level, lives, coins, settings, current puzzle including the answer and all guesses) SHALL be snapshotted to localStorage after every guess. When a save exists, the Adventure setup screen SHALL offer Continue, restoring the run exactly — including a partially guessed puzzle. Starting a new run SHALL replace the save; run over or victory SHALL clear it. A corrupt or unrecognizable save SHALL be discarded without crashing.
+The full run state (difficulty, level, lives, coins, settings, current puzzle including the answer and all guesses) SHALL be snapshotted to localStorage after every guess. When a save exists, the Adventure setup screen SHALL offer Continue — showing the saved difficulty — and restore the run exactly, including a partially guessed puzzle. Starting a new run SHALL replace the save; run over or victory SHALL clear it. A corrupt or unrecognizable save SHALL be discarded without crashing.
 
 #### Scenario: Snapshot after every guess
 - **WHEN** any guess is accepted
@@ -66,7 +66,7 @@ The full run state (level, lives, coins, settings, current puzzle including the 
 
 #### Scenario: Resume mid-puzzle
 - **WHEN** the app is closed mid-level and reopened
-- **THEN** Continue restores the same level, lives, coins, answer, and prior guesses
+- **THEN** Continue restores the same difficulty, level, lives, coins, answer, and prior guesses
 
 #### Scenario: Death clears the save
 - **WHEN** the run ends in defeat or victory
@@ -86,3 +86,22 @@ Boss levels SHALL be visibly marked during play, and SHALL open with an intro mo
 #### Scenario: Taunt before the boss
 - **WHEN** a boss level begins
 - **THEN** an intro overlay shows that boss's taunt line from the story module
+
+### Requirement: Difficulty modes
+Starting a new Adventure run SHALL require choosing a difficulty — Easy, Normal, or Hard — on the new-run screen. Difficulty SHALL only vary the starting position, per balance values: starting lives (`adventure.startingLives`, initially Easy 6 / Normal 6 / Hard 4) and starting perks (`adventure.startingPerks`, initially Easy starts owning Perk A at base tier for free). All other Adventure rules — economy, insurance, bosses, skips, shop timing, permanent unlock slots — SHALL be identical across difficulties. Difficulty SHALL be locked for the duration of the run and stored in the save state; resuming a saved run SHALL bypass the picker. Any Adventure completion stats or records added in the future SHALL be tracked per difficulty.
+
+#### Scenario: Picking a difficulty
+- **WHEN** the player starts a new run on Easy
+- **THEN** the run begins with 6 lives and Perk A at base tier, at no cost and consuming no slot
+
+#### Scenario: Normal and Hard starts
+- **WHEN** the player starts a new run on Normal or Hard
+- **THEN** the run begins with 6 or 4 lives respectively and no starting perks
+
+#### Scenario: Locked for the run
+- **WHEN** a run is in progress
+- **THEN** no mechanism exists to change its difficulty
+
+#### Scenario: Resume bypasses the picker
+- **WHEN** the player continues a saved run
+- **THEN** the saved difficulty applies without the picker being shown
