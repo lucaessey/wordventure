@@ -3,12 +3,14 @@ import {
   addLetter,
   advanceLevel,
   beginLevel,
+  emptyShop,
   isBossLevel,
   lengthForLevel,
   removeLetter,
   startRun,
   submitGuess,
   type AdventureConfig,
+  type AdventureDifficulty,
   type AdventureRunState,
 } from './adventure'
 import { balance } from '../data/balance'
@@ -277,5 +279,73 @@ describe('beginLevel restore behavior', () => {
     expect(resumed.answer).toBe('DOG')
     expect(resumed.guesses).toHaveLength(1)
     expect(resumed.phase).toBe('playing')
+  })
+})
+
+// These tests run against the REAL production config (src/data/balance.json),
+// not a test fixture, to pin the shipped economy numbers.
+describe('boss rewards resolve from balance.json (production values)', () => {
+  const config = balance.adventure
+  const DIFFICULTIES: AdventureDifficulty[] = ['easy', 'normal', 'hard']
+  const EXPECTED_BOSS = { easy: 25, normal: 20, hard: 15 } as const
+  const EXPECTED_LEVEL = 10
+
+  // Build a solved run at `level` using the real config: a valid guess equal to
+  // the answer wins immediately, so `lastReward`/`coins` reflect the config value.
+  function winAtLevel(difficulty: AdventureDifficulty, level: number): AdventureRunState {
+    const answer = 'A'.repeat(lengthForLevel(config, level))
+    const state: AdventureRunState = {
+      config,
+      difficulty,
+      theme: { kind: 'random' },
+      level,
+      lives: 4,
+      coins: 0,
+      lastReward: 0,
+      categoryId: 'original',
+      answer,
+      guesses: [],
+      input: answer,
+      phase: 'playing',
+      shop: emptyShop(),
+    }
+    // answer is passed as a valid guess so validation passes and the guess wins
+    return submitGuess(state, [answer], [answer]).state
+  }
+
+  const bossLevel = Object.keys(config.bossLevels).map(Number).sort((a, b) => a - b)[0]
+  const nonBossLevel = 1
+
+  it('level structure comes from balance.json (a real boss vs a non-boss level)', () => {
+    expect(isBossLevel(config, bossLevel)).toBe(true)
+    expect(isBossLevel(config, nonBossLevel)).toBe(false)
+  })
+
+  it('boss reward is $25 Easy / $20 Normal / $15 Hard, sourced from balance.json', () => {
+    for (const difficulty of DIFFICULTIES) {
+      // The value declared in balance.json matches the required amount…
+      expect(config.bossReward[difficulty]).toBe(EXPECTED_BOSS[difficulty])
+      // …and beating a boss actually awards exactly that (from config, not a literal)
+      const won = winAtLevel(difficulty, bossLevel)
+      expect(won.phase).toBe('level-won')
+      expect(won.lastReward).toBe(EXPECTED_BOSS[difficulty])
+      expect(won.lastReward).toBe(config.bossReward[difficulty])
+      expect(won.coins).toBe(EXPECTED_BOSS[difficulty])
+    }
+  })
+
+  it('non-boss level awards $10 on all three difficulties, sourced from balance.json', () => {
+    expect(config.rewards.level).toBe(EXPECTED_LEVEL)
+    for (const difficulty of DIFFICULTIES) {
+      const won = winAtLevel(difficulty, nonBossLevel)
+      expect(won.phase).toBe('level-won')
+      expect(won.lastReward).toBe(EXPECTED_LEVEL)
+      expect(won.lastReward).toBe(config.rewards.level)
+      expect(won.coins).toBe(EXPECTED_LEVEL)
+    }
+  })
+
+  it('the flat pre-difficulty boss reward is gone (no adventure.rewards.boss)', () => {
+    expect((config.rewards as Record<string, unknown>).boss).toBeUndefined()
   })
 })

@@ -80,6 +80,29 @@ export interface Balance {
       }
     }
   }
+  /** Achievement thresholds — all tunable, no hardcoded numbers in badge logic. */
+  achievements: {
+    /** Wordsmith: win a word this long or longer. */
+    wordsmithLength: number
+    /** Ace: win in this many guesses. */
+    aceGuesses: number
+    infinite: {
+      ascenderLevel: number
+      summiteerLevel: number
+      /** Hoarder: hold this many banked guesses at once. */
+      hoarderPool: number
+    }
+    /** Volume-tier thresholds (I/II/III), ascending. */
+    collection: {
+      gamesPlayed: number[]
+      totalWins: number[]
+      adventureCoins: number[]
+    }
+    /** Loyal: play on this many distinct days. */
+    loyalDays: number
+    /** Category ids that count as "flagship" for the solve-each-flagship badge. */
+    flagshipCategories: string[]
+  }
 }
 
 export const balance: Balance = balanceData

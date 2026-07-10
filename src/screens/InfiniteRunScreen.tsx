@@ -15,6 +15,7 @@ import {
 } from '../engine/infinite'
 import { keyboardState } from '../engine/keyboardState'
 import type { Category } from '../engine/types'
+import { recordEvent, todayString } from '../achievements/store'
 import { loadHighScores, recordRun, saveHighScores } from '../storage/highScores'
 import { Board } from '../components/Board'
 import { Keyboard } from '../components/Keyboard'
@@ -107,6 +108,40 @@ export function InfiniteRunScreen({ difficulty, theme, onHome }: InfiniteRunScre
   )
   const [newRecord, setNewRecord] = useState(false)
   const recordedRef = useRef(false)
+  // Achievement dedup guards (no game logic — just emit facts)
+  const achStartedRef = useRef(false)
+  const achLevelRef = useRef(0)
+  const achPoolRef = useRef(-1)
+  const achSolvedLevelRef = useRef(0)
+
+  useEffect(() => {
+    if (achStartedRef.current) return
+    achStartedRef.current = true
+    recordEvent({ type: 'game-started', mode: 'infinite', day: todayString() })
+  }, [])
+
+  useEffect(() => {
+    if (run.level !== achLevelRef.current && (run.phase === 'playing' || run.phase === 'loading')) {
+      achLevelRef.current = run.level
+      recordEvent({ type: 'level-reached', difficulty: run.difficulty, level: run.level })
+    }
+    if (run.pool !== achPoolRef.current) {
+      achPoolRef.current = run.pool
+      recordEvent({ type: 'pool-held', difficulty: run.difficulty, amount: run.pool })
+    }
+    if ((run.phase === 'level-won' || run.phase === 'victory') && achSolvedLevelRef.current !== run.level) {
+      achSolvedLevelRef.current = run.level
+      recordEvent({
+        type: 'word-solved',
+        mode: 'infinite',
+        difficulty: run.difficulty,
+        guessesUsed: run.guesses.length,
+        maxGuesses: 0,
+        answerLength: run.answer.length,
+        hadYellow: run.guesses.some((g) => g.feedback.includes('yellow')),
+      })
+    }
+  }, [run])
 
   // Load the level's words whenever the run enters 'loading'
   useEffect(() => {
@@ -135,6 +170,7 @@ export function InfiniteRunScreen({ difficulty, theme, onHome }: InfiniteRunScre
     const { scores, newRecord: record } = recordRun(loadHighScores(), run.difficulty, run.levelsBeaten)
     saveHighScores(scores)
     setNewRecord(record)
+    recordEvent({ type: 'run-finished', mode: 'infinite', difficulty: run.difficulty, won: run.phase === 'victory' })
   }, [run.phase, run.difficulty, run.levelsBeaten])
 
   useEffect(() => {

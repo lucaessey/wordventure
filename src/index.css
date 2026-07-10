@@ -99,6 +99,143 @@ button {
   color: var(--text-dim);
 }
 
+/* --- Trophy icon + Trophy Room + achievement toast ------------------------ */
+
+.trophy-button {
+  background: none;
+  font-size: 1.4rem;
+  line-height: 1;
+  padding: 4px;
+  border-radius: var(--radius);
+}
+
+.trophy-button:hover {
+  background: var(--surface);
+}
+
+.trophy-room {
+  flex: 1;
+  overflow-y: auto;
+  padding-bottom: 24px;
+}
+
+.trophy-group {
+  margin-bottom: 6px;
+}
+
+.badge {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  margin: 0 4px 8px;
+  opacity: 0.72;
+}
+
+.badge-earned {
+  opacity: 1;
+  border-color: var(--green);
+  box-shadow: inset 0 0 0 1px var(--green);
+}
+
+.badge-main {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.badge-name {
+  font-weight: 700;
+}
+
+.badge-how {
+  font-size: 0.78rem;
+  color: var(--text-dim);
+}
+
+.tier-pips {
+  display: flex;
+  gap: 4px;
+  flex: 0 0 auto;
+}
+
+.pip {
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  font-size: 0.65rem;
+  font-weight: 700;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+}
+
+.pip-on {
+  background: var(--green);
+  border-color: var(--green);
+  color: #fff;
+}
+
+.badge-check {
+  flex: 0 0 auto;
+  width: 22px;
+  text-align: center;
+  color: var(--green);
+  font-weight: 700;
+}
+
+.achievement-toasts {
+  position: fixed;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  pointer-events: none;
+  width: max-content;
+  max-width: 90vw;
+}
+
+.achievement-toast {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--surface-raised);
+  border: 1px solid var(--green);
+  border-radius: var(--radius);
+  padding: 8px 14px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+  animation: reveal 0.25s ease;
+}
+
+.achievement-toast-trophy {
+  font-size: 1.2rem;
+}
+
+.achievement-toast-body {
+  display: flex;
+  flex-direction: column;
+}
+
+.achievement-toast-label {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-dim);
+}
+
+.achievement-toast-name {
+  font-weight: 700;
+}
+
 /* --- Home: mode picker ---------------------------------------------------- */
 
 .home,

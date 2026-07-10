@@ -63,5 +63,21 @@
         "upgradedGuessThreshold": 4
       }
     }
+  },
+  "achievements": {
+    "wordsmithLength": 10,
+    "aceGuesses": 1,
+    "infinite": {
+      "ascenderLevel": 6,
+      "summiteerLevel": 9,
+      "hoarderPool": 20
+    },
+    "collection": {
+      "gamesPlayed": [10, 50, 100],
+      "totalWins": [10, 50, 100],
+      "adventureCoins": [100, 500, 1000]
+    },
+    "loyalDays": 7,
+    "flagshipCategories": ["original", "pokemon", "minecraft", "brawl-stars", "animals", "countries"]
   }
 }

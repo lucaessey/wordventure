@@ -11,6 +11,8 @@ import { InfiniteSetupScreen } from './screens/InfiniteSetupScreen'
 import { InfiniteRunScreen } from './screens/InfiniteRunScreen'
 import { AdventureSetupScreen } from './screens/AdventureSetupScreen'
 import { AdventureRunScreen } from './screens/AdventureRunScreen'
+import { TrophyRoomScreen } from './screens/TrophyRoomScreen'
+import { AchievementToast } from './components/AchievementToast'
 
 const CATEGORY_OPTIONS: CategoryOption[] = categories.map(({ id, lengths }) => ({ id, lengths }))
 
@@ -23,6 +25,7 @@ type Screen =
   | { name: 'infinite-run'; difficulty: Difficulty; theme: InfiniteTheme }
   | { name: 'adventure-setup' }
   | { name: 'adventure-run'; run: AdventureRunState }
+  | { name: 'trophy-room' }
 
 function categoryName(categoryId: string): string {
   return categories.find((c) => c.id === categoryId)?.displayName ?? categoryId
@@ -56,6 +59,8 @@ function headerContext(screen: Screen): string {
     case 'adventure-setup':
     case 'adventure-run':
       return 'Adventure'
+    case 'trophy-room':
+      return 'Trophy Room'
     default:
       return ''
   }
@@ -69,7 +74,17 @@ export default function App() {
   return (
     <div className="app">
       <header className="app-header">
-        {screen.name !== 'home' ? (
+        {screen.name === 'home' ? (
+          // Trophy icon lives in the top-left only on home, where there is no
+          // back button, so the two never collide.
+          <button
+            className="trophy-button"
+            aria-label="Trophy Room"
+            onClick={() => setScreen({ name: 'trophy-room' })}
+          >
+            🏆
+          </button>
+        ) : (
           <button
             className="back-button"
             aria-label="Back"
@@ -77,12 +92,12 @@ export default function App() {
           >
             ←
           </button>
-        ) : (
-          <span className="back-button-spacer" />
         )}
         <h1 className="app-title">Wordventure</h1>
         <span className="header-context">{headerContext(screen)}</span>
       </header>
+
+      <AchievementToast />
 
       {screen.name === 'home' && (
         <HomeScreen
@@ -153,6 +168,7 @@ export default function App() {
           }}
         />
       )}
+      {screen.name === 'trophy-room' && <TrophyRoomScreen />}
     </div>
   )
 }

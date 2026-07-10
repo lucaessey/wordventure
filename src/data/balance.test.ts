@@ -58,4 +58,20 @@ describe('balance', () => {
     expect(perkA.upgradedLivesPerLevel).toBeGreaterThan(perkA.livesPerLevel)
     expect(perkB.upgradedGuessThreshold).toBeGreaterThan(perkB.guessThreshold)
   })
+
+  it('exposes consistent achievement thresholds', () => {
+    const a = balance.achievements
+    expect(a.wordsmithLength).toBeGreaterThan(0)
+    expect(a.aceGuesses).toBeGreaterThan(0)
+    expect(a.infinite.summiteerLevel).toBeGreaterThan(a.infinite.ascenderLevel)
+    expect(a.infinite.hoarderPool).toBeGreaterThan(0)
+    expect(a.loyalDays).toBeGreaterThan(0)
+    expect(a.flagshipCategories.length).toBeGreaterThan(0)
+    // Volume tiers are ascending triples
+    for (const tiers of [a.collection.gamesPlayed, a.collection.totalWins, a.collection.adventureCoins]) {
+      expect(tiers).toHaveLength(3)
+      expect(tiers[0]).toBeLessThan(tiers[1])
+      expect(tiers[1]).toBeLessThan(tiers[2])
+    }
+  })
 })

@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useReducer } from 'react'
+import { useCallback, useEffect, useReducer, useRef } from 'react'
+import { recordEvent, todayString } from '../achievements/store'
 import { balance } from '../data/balance'
 import { loadCategory, loadDictionary } from '../data/load'
 import { keyboardState } from '../engine/keyboardState'
@@ -72,6 +73,7 @@ function reducer(state: UiState, action: UiAction): UiState {
 
 export function GameScreen({ categoryId, length, onHome }: GameScreenProps) {
   const [{ data, round, message, shakeToken }, dispatch] = useReducer(reducer, INITIAL)
+  const outcomeRoundRef = useRef<RoundState | null>(null)
 
   useEffect(() => {
     let cancelled = false
@@ -82,11 +84,33 @@ export function GameScreen({ categoryId, length, onHome }: GameScreenProps) {
         data: { category, dictionary },
         round: startRound(selectAnswer(category, length), balance.normal.guessCount),
       })
+      recordEvent({ type: 'game-started', mode: 'normal', categoryId, day: todayString() })
     })
     return () => {
       cancelled = true
     }
   }, [categoryId, length])
+
+  // Emit a win/loss event once per round when it ends (achievements only — no game logic).
+  useEffect(() => {
+    if (!round || round.status === 'playing' || outcomeRoundRef.current === round) return
+    outcomeRoundRef.current = round
+    if (round.status === 'won') {
+      recordEvent({
+        type: 'word-solved',
+        mode: 'normal',
+        guessesUsed: round.guesses.length,
+        maxGuesses: round.maxGuesses,
+        answerLength: round.answer.length,
+        categoryId,
+        hadYellow: round.guesses.some((g) => g.feedback.includes('yellow')),
+      })
+    } else {
+      const last = round.guesses[round.guesses.length - 1]
+      const greens = last ? last.feedback.filter((t) => t === 'green').length : 0
+      recordEvent({ type: 'game-lost', mode: 'normal', answerLength: round.answer.length, lastGuessGreens: greens })
+    }
+  }, [round, categoryId])
 
   useEffect(() => {
     if (!message) return
@@ -102,6 +126,7 @@ export function GameScreen({ categoryId, length, onHome }: GameScreenProps) {
       type: 'new-round',
       round: startRound(selectAnswer(data.category, length), balance.normal.guessCount),
     })
+    recordEvent({ type: 'game-started', mode: 'normal', categoryId, day: todayString() })
   }
 
   if (!round) {

@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useReducer } from 'react'
+import { useCallback, useEffect, useReducer, useRef } from 'react'
+import { recordEvent, todayString } from '../achievements/store'
 import { categories, loadCategory, loadDictionary } from '../data/load'
 import { tauntForLevel } from '../data/story'
 import {
@@ -191,6 +192,67 @@ export function AdventureRunScreen({ initialRun, onHome, onNewRun }: AdventureRu
   useEffect(() => {
     if (run.phase === 'run-over' || run.phase === 'victory') clearRun()
     else saveRun(run)
+  }, [run])
+
+  // Achievements: emit gameplay facts (no game logic). Refs dedup per run/level.
+  const achStartedRef = useRef(false)
+  const achSolvedLevelRef = useRef(0)
+  const achCoinsLevelRef = useRef(0)
+  const achBossLevelRef = useRef(0)
+  const achPerksMaxedRef = useRef(false)
+  const achBoughtInsuranceRef = useRef(false)
+  const achRevivedRef = useRef(false)
+  const achFinishedRef = useRef(false)
+
+  useEffect(() => {
+    if (achStartedRef.current) return
+    achStartedRef.current = true
+    // Count a genuinely new run, not a resume of an in-progress one
+    if (initialRun.level === 1 && initialRun.guesses.length === 0 && initialRun.coins === 0) {
+      recordEvent({ type: 'game-started', mode: 'adventure', day: todayString() })
+    }
+  }, [initialRun])
+
+  useEffect(() => {
+    if (run.shop.insurance.owned || run.shop.insurance.everUsed) achBoughtInsuranceRef.current = true
+    if (run.phase === 'revived') achRevivedRef.current = true
+    if (!achPerksMaxedRef.current && run.shop.perkA === 2 && run.shop.perkB === 2) {
+      achPerksMaxedRef.current = true
+      recordEvent({ type: 'perks-maxed', difficulty: run.difficulty })
+    }
+    const solved = run.phase === 'level-won' || run.phase === 'victory'
+    // A real solve has guesses; a bought skip does not (skips are not "wins")
+    if (solved && run.guesses.length > 0 && achSolvedLevelRef.current !== run.level) {
+      achSolvedLevelRef.current = run.level
+      recordEvent({
+        type: 'word-solved',
+        mode: 'adventure',
+        difficulty: run.difficulty,
+        guessesUsed: run.guesses.length,
+        maxGuesses: 0,
+        answerLength: run.answer.length,
+        hadYellow: run.guesses.some((g) => g.feedback.includes('yellow')),
+      })
+    }
+    if (solved && run.lastReward > 0 && achCoinsLevelRef.current !== run.level) {
+      achCoinsLevelRef.current = run.level
+      recordEvent({ type: 'coins-earned', delta: run.lastReward })
+    }
+    if (solved && isBossLevel(run.config, run.level) && achBossLevelRef.current !== run.level) {
+      achBossLevelRef.current = run.level
+      recordEvent({ type: 'boss-beaten', difficulty: run.difficulty })
+    }
+    if ((run.phase === 'run-over' || run.phase === 'victory') && !achFinishedRef.current) {
+      achFinishedRef.current = true
+      recordEvent({
+        type: 'run-finished',
+        mode: 'adventure',
+        difficulty: run.difficulty,
+        won: run.phase === 'victory',
+        boughtInsuranceEver: achBoughtInsuranceRef.current,
+        revivedAndWon: run.phase === 'victory' && achRevivedRef.current,
+      })
+    }
   }, [run])
 
   useEffect(() => {

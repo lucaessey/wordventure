@@ -88,6 +88,53 @@ Rules that apply to all difficulties:
 - Perk A: +1 life every level beaten, $60. Upgrade: +2 lives per level, $80.
 - Perk B: free hint every level beaten in ≤3 guesses, $60. Upgrade: trigger becomes ≤4 guesses, $80.
 
+## Achievements & Trophy Room
+
+A badge system that rewards milestones across all modes, viewed in a Trophy Room.
+
+### System
+
+- Achievements are tracked in `localStorage`, driven by events the game already produces (game won, guesses used, level reached, boss beaten, coins earned, run finished, etc.). No new game-engine logic — the pure engines are unchanged; the achievement tracker only listens to existing gameplay events emitted by the view layer.
+- Three kinds of achievement: **single-tier**, **difficulty-tiered** (I/II/III), and **volume-tiered** (I/II/III).
+- All thresholds/amounts live in `balance.json`, not hardcoded.
+
+### Difficulty-tiered rules (Infinite and Adventure)
+
+- Tier I is earned only on the mode's easiest difficulty, Tier II only on its middle difficulty, Tier III only on its hardest. Concretely: **Infinite → Easy / Medium / Hard**; **Adventure → Easy / Normal / Hard** (Infinite's middle tier is Medium, since Infinite has no "Normal").
+- Tiers do NOT stack: doing the feat on the hardest difficulty earns Tier III only, not I and II. Each tier must be earned on its exact difficulty.
+- An achievement already locked to a specific difficulty (e.g. "clear on Hard") stays single-tier with no tiers.
+
+### Volume-tiered rules (Collection)
+
+- Tiers are by amount, not difficulty: Tier I / II / III. Games played and total wins: 10 / 50 / 100. Lifetime Adventure coins: 100 / 500 / 1000.
+
+### Mode restrictions
+
+- Onboarding and Skill achievements can only be earned in Normal mode.
+- Exception: "Win in every mode" is its own single-tier **Explorer** achievement, not part of Onboarding.
+
+### Starter achievement set
+
+**Onboarding** (Normal only, single-tier): First win; Play every category once; Solve a word in each flagship category.
+
+**Skill** (Normal only, single-tier): Ace (win in 1 guess); Clutch (win on the final guess); Purist (win with no yellow tiles — every guess only green/gray); Wordsmith (win a 10+ letter word).
+
+**Explorer** (single-tier): Win in every mode (Normal, Infinite, Adventure).
+
+**Infinite** (difficulty-tiered I/II/III unless noted): Ascender (reach level 6); Summiteer (reach level 9); Perfect Climb (clear all 12 levels); Hoarder (hold 20+ banked guesses at once).
+
+**Adventure** (difficulty-tiered I/II/III unless noted): First Blood (beat your first boss); Savior (finish the campaign — beat level 25); Ironman (finish a run without ever buying insurance); Phoenix (revive from insurance and go on to win the run); Tycoon (own every permanent upgrade at once).
+
+**Collection** (volume-tiered I/II/III): Regular (games played 10/50/100); Champion (total wins 10/50/100); Rich (lifetime Adventure coins 100/500/1000).
+
+**Fun** (single-tier, HIDDEN — shown as "???" until earned): Oof (lose with the answer one letter away on your last guess); Loyal (play on 7 different days).
+
+### Trophy Room
+
+- A trophy icon (🏆) sits in the TOP-LEFT of the home screen and opens the Trophy Room. It must not overlap or conflict with a back button or other top-left navigation: on screens where a back button occupies the top-left, the trophy icon is placed elsewhere or omitted there. The home screen is the primary place it appears.
+- The Trophy Room is the achievements screen: it lists ALL achievements, earned and locked. Earned ones are highlighted; locked ones show their name and how to earn them; tiered ones show which tiers (I/II/III) are earned vs still locked; hidden ones show "???" until unlocked.
+- A small toast/notification appears when an achievement unlocks, regardless of which screen the player is on.
+
 ## Planned OpenSpec change sequence
 
 1. `add-word-data-and-guess-engine` — data schema, dictionaries, pure guess engine with tests. No UI.
