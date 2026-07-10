@@ -33,8 +33,12 @@
     },
     "nonBossRamp": [4, 4, 5, 5, 5, 6, 6, 7, 7, 7, 8, 8, 8, 9, 9, 9, 9, 10, 10, 10],
     "rewards": {
-      "level": 10,
-      "boss": 50
+      "level": 10
+    },
+    "bossReward": {
+      "easy": 25,
+      "normal": 20,
+      "hard": 15
     },
     "shop": {
       "lifePrice": 3,

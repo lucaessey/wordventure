@@ -71,7 +71,7 @@ Rules that apply to all difficulties:
 
 ### Economy (all values in balance.json)
 
-- Earn: +$10 per level beaten, +$50 per boss beaten.
+- Earn: +$10 per non-boss level beaten (same across all difficulties). Boss reward varies by difficulty (`adventure.bossReward.easy/normal/hard`): Easy +$25, Normal +$20, Hard +$15.
 - Buy: +1 life $3; hint $6; level skip $50.
 - Skips: cannot skip boss levels; a skipped level pays no reward but counts as "beaten" for permanent-upgrade triggers.
 - Hints ($6 each, player picks type at time of use): (a) reveal a correct letter in its position, (b) reveal a letter that is in the word, (c) remove wrong letters from the keyboard.

@@ -27,7 +27,8 @@ const CONFIG: AdventureConfig = {
   startingPerks: TEST_STARTING_PERKS,
   bossLevels: { '3': 5 },
   nonBossRamp: [3, 3, 3, 3, 3],
-  rewards: { level: 10, boss: 50 },
+  rewards: { level: 10 },
+  bossReward: { easy: 25, normal: 20, hard: 15 },
   shop: TEST_SHOP,
 }
 
@@ -182,7 +183,8 @@ describe('permanent upgrades', () => {
     const { state } = submitGuess(s, ['CRANE'], [])
     expect(state.phase).toBe('level-won')
     expect(state.shop.permanentSlots).toBe(1)
-    expect(state.coins).toBe(100 + CONFIG.rewards.boss)
+    // baseState runs on Hard, so the boss pays the Hard rate
+    expect(state.coins).toBe(100 + CONFIG.bossReward.hard)
   })
 
   it('buying a perk consumes a slot and coins', () => {

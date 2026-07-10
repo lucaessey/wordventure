@@ -24,8 +24,8 @@ export interface AdventureConfig {
   nonBossRamp: number[]
   rewards: {
     level: number
-    boss: number
   }
+  bossReward: Record<AdventureDifficulty, number>
   shop: {
     lifePrice: number
     hintPrice: number
@@ -248,7 +248,9 @@ export function submitGuess(
 
   if (validation.word === state.answer) {
     const boss = isBossLevel(state.config, state.level)
-    const reward = boss ? state.config.rewards.boss : state.config.rewards.level
+    const reward = boss
+      ? state.config.bossReward[state.difficulty]
+      : state.config.rewards.level
     const coins = state.coins + reward
     if (state.level >= state.config.levelCount) {
       return { state: { ...state, guesses, lives, coins, lastReward: reward, input: '', phase: 'victory' } }

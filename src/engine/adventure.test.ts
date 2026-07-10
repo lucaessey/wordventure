@@ -35,7 +35,8 @@ const CONFIG: AdventureConfig = {
   startingPerks: TEST_STARTING_PERKS,
   bossLevels: { '3': 5 },
   nonBossRamp: [3, 3, 4],
-  rewards: { level: 10, boss: 50 },
+  rewards: { level: 10 },
+  bossReward: { easy: 25, normal: 20, hard: 15 },
   shop: TEST_SHOP,
 }
 
@@ -221,8 +222,28 @@ describe('coins and progression', () => {
     expect(state.answer).toHaveLength(5)
     state = winLevel(state)
     expect(state.phase).toBe('level-won')
-    expect(state.coins).toBe(20 + 50)
-    expect(state.lastReward).toBe(50)
+    // playing() runs on Hard, so the boss pays the Hard rate
+    expect(state.coins).toBe(20 + CONFIG.bossReward.hard)
+    expect(state.lastReward).toBe(CONFIG.bossReward.hard)
+  })
+
+  it('pays the boss reward for the run difficulty', () => {
+    // Advance a run of the given difficulty to the boss (level 3) and win it.
+    const bossWin = (difficulty: 'easy' | 'normal' | 'hard') => {
+      let state = startRun(difficulty, { kind: 'fixed', categoryId: 'animals' }, CATEGORIES, CONFIG, () => 0)
+      state = beginLevel(state, ANIMALS, () => 0)
+      state = winLevel(state) // level 1
+      state = nextLevel(state)
+      state = winLevel(state) // level 2
+      state = nextLevel(state) // level 3 = boss (original, length 5)
+      return winLevel(state)
+    }
+    expect(bossWin('easy').lastReward).toBe(CONFIG.bossReward.easy)
+    expect(bossWin('normal').lastReward).toBe(CONFIG.bossReward.normal)
+    expect(bossWin('hard').lastReward).toBe(CONFIG.bossReward.hard)
+    // The three rates are distinct
+    const { easy, normal, hard } = CONFIG.bossReward
+    expect(new Set([easy, normal, hard]).size).toBe(3)
   })
 
   it('reaches victory on the final level', () => {
@@ -236,7 +257,7 @@ describe('coins and progression', () => {
     expect(state.level).toBe(4)
     state = winLevel(state)
     expect(state.phase).toBe('victory')
-    expect(state.coins).toBe(10 + 10 + 50 + 10)
+    expect(state.coins).toBe(10 + 10 + CONFIG.bossReward.hard + 10)
   })
 
   it('is deterministic under a seeded RNG', () => {

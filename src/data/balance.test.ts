@@ -18,7 +18,7 @@ describe('balance', () => {
   })
 
   it('exposes a consistent Adventure campaign shape', () => {
-    const { levelCount, startingLives, startingPerks, bossLevels, nonBossRamp, rewards } =
+    const { levelCount, startingLives, startingPerks, bossLevels, nonBossRamp, rewards, bossReward } =
       balance.adventure
     for (const difficulty of ['easy', 'normal', 'hard'] as const) {
       expect(startingLives[difficulty]).toBeGreaterThan(0)
@@ -26,8 +26,10 @@ describe('balance', () => {
       for (const tier of Object.values(startingPerks[difficulty])) {
         expect([1, 2]).toContain(tier)
       }
+      // Boss reward is a positive per-difficulty value
+      expect(bossReward[difficulty]).toBeGreaterThan(0)
     }
-    expect(rewards.boss).toBeGreaterThan(rewards.level)
+    expect(rewards.level).toBeGreaterThan(0)
 
     const bossEntries = Object.entries(bossLevels)
     expect(bossEntries).toHaveLength(5)

@@ -42,10 +42,15 @@ export interface Balance {
     bossLevels: Record<string, number>
     /** Word lengths for the non-boss levels in campaign order. Tune in playtesting. */
     nonBossRamp: number[]
-    /** Coins earned for beating a level / a boss. */
+    /** Coins earned for beating a non-boss level (flat across difficulties). */
     rewards: {
       level: number
-      boss: number
+    }
+    /** Coins earned for beating a boss, per difficulty. */
+    bossReward: {
+      easy: number
+      normal: number
+      hard: number
     }
     shop: {
       lifePrice: number
