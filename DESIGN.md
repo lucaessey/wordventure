@@ -88,23 +88,6 @@ Rules that apply to all difficulties:
 - Perk A: +1 life every level beaten, $60. Upgrade: +2 lives per level, $80.
 - Perk B: free hint every level beaten in ≤3 guesses, $60. Upgrade: trigger becomes ≤4 guesses, $80.
 
-## Mode 4 — Who's That Pokemon?
-
-A hybrid image + word mode: guess the hidden Pokemon from its silhouette using Wordle letter clues.
-
-- Presentation: its own box on the home screen, separate from the category grid / other mode boxes. Single round per play — no run, streak, or campaign structure.
-- The player sees a SILHOUETTE of a Pokemon and must type its name.
-- Reuses the core guess engine: 6 guesses, on-screen keyboard, and full Wordle green/yellow/gray letter feedback on each guess. This is a hybrid — the image is a clue alongside the letter feedback.
-- Word length equals the Pokemon's name length. Valid guesses follow the same union rule as other categories: a guess is valid if it is in the Pokemon name list OR the standard English dictionary.
-- On a correct guess (or after the 6th guess), the silhouette reveals to the full-color image with the Pokemon's name shown.
-
-### Asset architecture (data-driven; images supplied separately)
-
-- The mode reads from a manifest file, e.g. `src/data/whos-that-pokemon.json`, listing entries of `{ name, silhouetteImage, revealImage }`.
-- Images live in a dedicated assets folder (e.g. `public/pokemon/`). The mode MUST work with whatever entries are in the manifest — no hardcoded count. Gen 1 (151) is the starting set and may expand; the code must not assume a fixed number.
-- Image sourcing and licensing are handled outside the game code. The assets folder ships empty except for a README documenting the expected filename convention and image format (transparent-background PNG, square, consistent size). A few placeholder manifest entries exist so the mode is testable before real art is added.
-- Silhouette rendering is kept simple and swappable: preferred approach renders the silhouette from a single transparent-background image via CSS (e.g. `filter: brightness(0)`), so one source image can serve as both silhouette and reveal rather than requiring two files per Pokemon. The manifest still supports separate `silhouetteImage`/`revealImage` for cases that want distinct art. This option is noted in the assets README.
-
 ## Planned OpenSpec change sequence
 
 1. `add-word-data-and-guess-engine` — data schema, dictionaries, pure guess engine with tests. No UI.

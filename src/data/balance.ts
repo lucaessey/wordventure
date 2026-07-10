@@ -9,10 +9,6 @@ export interface Balance {
     /** Fixed guesses per Normal game. */
     guessCount: number
   }
-  whosThatPokemon: {
-    /** Fixed guesses per Who's That Pokemon round. */
-    guessCount: number
-  }
   infinite: {
     /** Levels per run; word length ramps one per level. */
     levelCount: number
