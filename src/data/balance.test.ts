@@ -18,9 +18,9 @@ describe('balance', () => {
   })
 
   it('exposes a consistent Adventure campaign shape', () => {
-    const { levelCount, startingLives, startingPerks, bossLevels, nonBossRamp, rewards, bossReward } =
+    const { levelCount, startingLives, startingPerks, bossLevels, nonBossRamp, rewards, bossReward, lifeTaxPerRound } =
       balance.adventure
-    for (const difficulty of ['easy', 'normal', 'hard'] as const) {
+    for (const difficulty of ['easy', 'normal', 'hard', 'extraHard'] as const) {
       expect(startingLives[difficulty]).toBeGreaterThan(0)
       // Starting perk tiers, when present, are valid perk levels (1 = base, 2 = upgraded)
       for (const tier of Object.values(startingPerks[difficulty])) {
@@ -28,6 +28,13 @@ describe('balance', () => {
       }
       // Boss reward is a positive per-difficulty value
       expect(bossReward[difficulty]).toBeGreaterThan(0)
+    }
+    // Extra Hard mirrors Hard's start and taxes a life each round; the rest do not
+    expect(startingLives.extraHard).toBe(startingLives.hard)
+    expect(bossReward.extraHard).toBe(bossReward.hard)
+    expect(lifeTaxPerRound.extraHard).toBeGreaterThan(0)
+    for (const difficulty of ['easy', 'normal', 'hard'] as const) {
+      expect(lifeTaxPerRound[difficulty]).toBe(0)
     }
     expect(rewards.level).toBeGreaterThan(0)
 

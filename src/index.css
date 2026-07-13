@@ -300,6 +300,15 @@ button {
   padding: 0 4px;
 }
 
+/* Four difficulty chips: wrap to 2×2 on narrow screens instead of cramming. */
+.chip-row-difficulty {
+  flex-wrap: wrap;
+}
+
+.chip-row-difficulty .chip {
+  flex: 1 1 calc(50% - 8px);
+}
+
 .chip-row-wrap {
   flex-wrap: wrap;
   margin-top: 8px;

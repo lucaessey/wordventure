@@ -17,14 +17,17 @@ const DIFFICULTY_LABELS: Record<AdventureDifficulty, string> = {
   easy: 'Easy',
   normal: 'Normal',
   hard: 'Hard',
+  extraHard: 'Extra Hard',
 }
 
 /** Blurb built from balance values so it never drifts from the numbers. */
 function difficultyBlurb(difficulty: AdventureDifficulty): string {
   const lives = balance.adventure.startingLives[difficulty]
   const perks = balance.adventure.startingPerks[difficulty]
+  const tax = balance.adventure.lifeTaxPerRound[difficulty]
   const parts = [`${lives} lives`]
   if (perks.perkA) parts.push('free bonus-lives perk')
+  if (tax > 0) parts.push(`−${tax} life each round`)
   return parts.join(' · ')
 }
 
@@ -66,8 +69,8 @@ export function AdventureSetupScreen({ onStart, onContinue }: AdventureSetupScre
       )}
 
       <h3 className="setup-heading">Difficulty</h3>
-      <div className="chip-row">
-        {(['easy', 'normal', 'hard'] as const).map((d) => (
+      <div className="chip-row chip-row-difficulty">
+        {(['easy', 'normal', 'hard', 'extraHard'] as const).map((d) => (
           <button
             key={d}
             className={`chip${difficulty === d ? ' chip-selected' : ''}`}

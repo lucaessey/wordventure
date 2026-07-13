@@ -31,12 +31,21 @@ export interface Balance {
       easy: number
       normal: number
       hard: number
+      extraHard: number
     }
     /** Perk tiers a difficulty starts owning for free (no slot consumed). */
     startingPerks: {
       easy: { perkA?: number; perkB?: number }
       normal: { perkA?: number; perkB?: number }
       hard: { perkA?: number; perkB?: number }
+      extraHard: { perkA?: number; perkB?: number }
+    }
+    /** Lives lost at the end of each completed round, per difficulty (Extra Hard's tax). */
+    lifeTaxPerRound: {
+      easy: number
+      normal: number
+      hard: number
+      extraHard: number
     }
     /** Boss level number → word length. Design-fixed; do not retune casually. */
     bossLevels: Record<string, number>
@@ -51,6 +60,7 @@ export interface Balance {
       easy: number
       normal: number
       hard: number
+      extraHard: number
     }
     shop: {
       lifePrice: number

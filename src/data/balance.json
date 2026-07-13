@@ -17,12 +17,20 @@
     "startingLives": {
       "easy": 6,
       "normal": 6,
-      "hard": 4
+      "hard": 4,
+      "extraHard": 4
     },
     "startingPerks": {
       "easy": { "perkA": 1 },
       "normal": {},
-      "hard": {}
+      "hard": {},
+      "extraHard": {}
+    },
+    "lifeTaxPerRound": {
+      "easy": 0,
+      "normal": 0,
+      "hard": 0,
+      "extraHard": 1
     },
     "bossLevels": {
       "5": 10,
@@ -38,7 +46,8 @@
     "bossReward": {
       "easy": 25,
       "normal": 20,
-      "hard": 15
+      "hard": 15,
+      "extraHard": 15
     },
     "shop": {
       "lifePrice": 3,

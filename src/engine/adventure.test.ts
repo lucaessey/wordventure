@@ -27,18 +27,22 @@ export const TEST_SHOP: AdventureConfig['shop'] = {
 }
 
 /** Shared per-difficulty start for test configs: 4 lives all round, no free perks. */
-export const TEST_STARTING_LIVES: AdventureConfig['startingLives'] = { easy: 4, normal: 4, hard: 4 }
-export const TEST_STARTING_PERKS: AdventureConfig['startingPerks'] = { easy: {}, normal: {}, hard: {} }
+export const TEST_STARTING_LIVES: AdventureConfig['startingLives'] = { easy: 4, normal: 4, hard: 4, extraHard: 4 }
+export const TEST_STARTING_PERKS: AdventureConfig['startingPerks'] = { easy: {}, normal: {}, hard: {}, extraHard: {} }
+/** No per-round tax in shared fixtures (Extra Hard tax is exercised by dedicated tests). */
+export const TEST_LIFE_TAX: AdventureConfig['lifeTaxPerRound'] = { easy: 0, normal: 0, hard: 0, extraHard: 0 }
+export const TEST_BOSS_REWARD: AdventureConfig['bossReward'] = { easy: 25, normal: 20, hard: 15, extraHard: 15 }
 
 // Small campaign: 4 levels, boss at 3 (length 5). Non-boss lengths 3, 3, 4.
 const CONFIG: AdventureConfig = {
   levelCount: 4,
   startingLives: TEST_STARTING_LIVES,
   startingPerks: TEST_STARTING_PERKS,
+  lifeTaxPerRound: TEST_LIFE_TAX,
   bossLevels: { '3': 5 },
   nonBossRamp: [3, 3, 4],
   rewards: { level: 10 },
-  bossReward: { easy: 25, normal: 20, hard: 15 },
+  bossReward: TEST_BOSS_REWARD,
   shop: TEST_SHOP,
 }
 
@@ -140,8 +144,8 @@ describe('difficulty', () => {
   // A config with the real per-difficulty starts: Easy/Normal 6, Hard 4; Easy free Perk A.
   const DIFF_CONFIG: AdventureConfig = {
     ...CONFIG,
-    startingLives: { easy: 6, normal: 6, hard: 4 },
-    startingPerks: { easy: { perkA: 1 }, normal: {}, hard: {} },
+    startingLives: { easy: 6, normal: 6, hard: 4, extraHard: 4 },
+    startingPerks: { easy: { perkA: 1 }, normal: {}, hard: {}, extraHard: {} },
   }
 
   it('seeds per-difficulty starting lives', () => {
@@ -286,7 +290,7 @@ describe('beginLevel restore behavior', () => {
 // not a test fixture, to pin the shipped economy numbers.
 describe('boss rewards resolve from balance.json (production values)', () => {
   const config = balance.adventure
-  const DIFFICULTIES: AdventureDifficulty[] = ['easy', 'normal', 'hard']
+  const DIFFICULTIES = ['easy', 'normal', 'hard'] as const
   const EXPECTED_BOSS = { easy: 25, normal: 20, hard: 15 } as const
   const EXPECTED_LEVEL = 10
 
@@ -347,5 +351,67 @@ describe('boss rewards resolve from balance.json (production values)', () => {
 
   it('the flat pre-difficulty boss reward is gone (no adventure.rewards.boss)', () => {
     expect((config.rewards as Record<string, unknown>).boss).toBeUndefined()
+  })
+})
+
+describe('Extra Hard per-round life tax', () => {
+  // Same small campaign, but Extra Hard taxes 1 life per completed round.
+  const EH_CONFIG: AdventureConfig = {
+    ...CONFIG,
+    lifeTaxPerRound: { easy: 0, normal: 0, hard: 0, extraHard: 1 },
+  }
+
+  function ehState(over: Partial<AdventureRunState> = {}): AdventureRunState {
+    return {
+      config: EH_CONFIG,
+      difficulty: 'extraHard',
+      theme: { kind: 'random' },
+      level: 1,
+      lives: 4,
+      coins: 0,
+      lastReward: 0,
+      categoryId: 'original',
+      answer: 'CAT',
+      guesses: [],
+      input: '',
+      phase: 'playing',
+      shop: emptyShop(),
+      ...over,
+    }
+  }
+
+  // Win the round by guessing the answer (passed as a valid word).
+  const solveRound = (s: AdventureRunState) =>
+    submitGuess({ ...s, input: s.answer }, [s.answer], [s.answer]).state
+
+  it('taxes a life at the end of a round, on top of the winning guess cost', () => {
+    const won = solveRound(ehState({ lives: 4 }))
+    expect(won.phase).toBe('level-won')
+    expect(won.lives).toBe(2) // 4 − 1 (winning guess) − 1 (tax)
+  })
+
+  it('floors at 1 — finishing at 1 life keeps 1 and continues', () => {
+    const won = solveRound(ehState({ lives: 2 })) // 2 − 1 guess = 1, tax floors at 1
+    expect(won.phase).toBe('level-won')
+    expect(won.lives).toBe(1)
+  })
+
+  it('does not resurrect a last-life solve — the run still ends on advancing', () => {
+    const won = solveRound(ehState({ lives: 1 })) // 1 − 1 guess = 0; tax leaves 0
+    expect(won.lives).toBe(0)
+    expect(advanceLevel(won, CATEGORIES, () => 0).phase).toBe('run-over')
+  })
+
+  it('taxes boss rounds too and still pays the Hard-equal boss reward', () => {
+    const won = solveRound(ehState({ level: 3, answer: 'CRANE', lives: 4 })) // level 3 = boss (len 5)
+    expect(won.phase).toBe('level-won')
+    expect(won.lives).toBe(2)
+    expect(won.coins).toBe(EH_CONFIG.bossReward.extraHard)
+    expect(won.shop.permanentSlots).toBe(1)
+  })
+
+  it('other difficulties are untaxed (only the guess cost)', () => {
+    const hardWon = solveRound(ehState({ difficulty: 'hard', lives: 4 }))
+    expect(hardWon.lives).toBe(3)
   })
 })

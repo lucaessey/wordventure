@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { evaluate, type EvalConfig } from './evaluate'
-import { emptyProgress, type AchievementEvent, type AchievementProgress } from './types'
+import { difficultyTier, emptyProgress, type AchievementEvent, type AchievementProgress } from './types'
 
 const CONFIG: EvalConfig = {
   wordsmithLength: 10,
@@ -204,5 +204,28 @@ describe('idempotency and thresholds', () => {
     const loose: EvalConfig = { ...CONFIG, wordsmithLength: 4 }
     const { progress } = { progress: evaluate(emptyProgress(), normalWin({ answerLength: 4 }), loose).progress }
     expect(progress.earned['wordsmith']).toEqual([1])
+  })
+})
+
+describe('Extra Hard earns no difficulty tier (tiers unchanged) but counts for volume badges', () => {
+  it('difficultyTier maps Extra Hard to 0 (no tier)', () => {
+    expect(difficultyTier('adventure', 'extraHard')).toBe(0)
+    // The three real tiers are unchanged
+    expect(difficultyTier('adventure', 'easy')).toBe(1)
+    expect(difficultyTier('adventure', 'normal')).toBe(2)
+    expect(difficultyTier('adventure', 'hard')).toBe(3)
+  })
+
+  it('an Extra Hard boss beat earns no First Blood tier', () => {
+    const { progress } = run([{ type: 'boss-beaten', difficulty: 'extraHard' }])
+    expect(progress.earned['first-blood'] ?? []).toEqual([])
+  })
+
+  it('an Extra Hard win still counts toward Champion (volume, not tiered)', () => {
+    const { progress } = run([
+      { type: 'word-solved', mode: 'adventure', difficulty: 'extraHard', guessesUsed: 2, maxGuesses: 0, answerLength: 5, hadYellow: true },
+    ])
+    expect(progress.counters.totalWins).toBe(1)
+    expect(progress.modesWon).toContain('adventure')
   })
 })

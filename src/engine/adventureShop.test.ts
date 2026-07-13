@@ -8,7 +8,7 @@ import {
   type AdventureConfig,
   type AdventureRunState,
 } from './adventure'
-import { TEST_SHOP, TEST_STARTING_LIVES, TEST_STARTING_PERKS } from './adventure.test'
+import { TEST_BOSS_REWARD, TEST_LIFE_TAX, TEST_SHOP, TEST_STARTING_LIVES, TEST_STARTING_PERKS } from './adventure.test'
 import {
   buyInsurance,
   buyLife,
@@ -25,10 +25,11 @@ const CONFIG: AdventureConfig = {
   levelCount: 6,
   startingLives: TEST_STARTING_LIVES,
   startingPerks: TEST_STARTING_PERKS,
+  lifeTaxPerRound: TEST_LIFE_TAX,
   bossLevels: { '3': 5 },
   nonBossRamp: [3, 3, 3, 3, 3],
   rewards: { level: 10 },
-  bossReward: { easy: 25, normal: 20, hard: 15 },
+  bossReward: TEST_BOSS_REWARD,
   shop: TEST_SHOP,
 }
 

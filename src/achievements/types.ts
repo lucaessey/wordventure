@@ -1,8 +1,8 @@
 /** The three game modes achievements can come from. */
 export type Mode = 'normal' | 'infinite' | 'adventure'
 
-/** Union of every difficulty across modes (Infinite: easy/medium/hard; Adventure: easy/normal/hard). */
-export type Difficulty = 'easy' | 'medium' | 'normal' | 'hard'
+/** Union of every difficulty across modes (Infinite: easy/medium/hard; Adventure: easy/normal/hard/extraHard). */
+export type Difficulty = 'easy' | 'medium' | 'normal' | 'hard' | 'extraHard'
 
 export type AchievementGroup =
   | 'onboarding'

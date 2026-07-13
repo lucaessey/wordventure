@@ -50,6 +50,7 @@ const DIFFICULTY_LABELS: Record<AdventureDifficulty, string> = {
   easy: 'Easy',
   normal: 'Normal',
   hard: 'Hard',
+  extraHard: 'Extra Hard',
 }
 
 const CATEGORY_OPTIONS: CategoryOption[] = categories.map(({ id, lengths }) => ({ id, lengths }))

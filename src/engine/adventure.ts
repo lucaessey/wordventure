@@ -10,7 +10,7 @@ import type { Category, ScoredGuess } from './types'
  * `Difficulty` (`easy | medium | hard`): the middle tier differs and the two
  * modes' difficulties mean different things.
  */
-export type AdventureDifficulty = 'easy' | 'normal' | 'hard'
+export type AdventureDifficulty = 'easy' | 'normal' | 'hard' | 'extraHard'
 
 export interface AdventureConfig {
   levelCount: number
@@ -18,6 +18,8 @@ export interface AdventureConfig {
   startingLives: Record<AdventureDifficulty, number>
   /** Perk tiers a difficulty starts owning for free (no slot consumed). */
   startingPerks: Record<AdventureDifficulty, { perkA?: number; perkB?: number }>
+  /** Lives lost at the end of each completed round, per difficulty (Extra Hard's tax). */
+  lifeTaxPerRound: Record<AdventureDifficulty, number>
   /** Boss level number (as string key) → word length. */
   bossLevels: Record<string, number>
   /** Word lengths for the non-boss levels in campaign order. */
@@ -252,8 +254,14 @@ export function submitGuess(
       ? state.config.bossReward[state.difficulty]
       : state.config.rewards.level
     const coins = state.coins + reward
+    // End-of-round life tax (Extra Hard only; 0 elsewhere). Floors at 1 for a
+    // positive life total and never resurrects a 0-life (last-life) solve.
+    const tax = state.config.lifeTaxPerRound[state.difficulty]
+    const applyTax = (l: number): number => (l > 0 ? Math.max(1, l - tax) : l)
     if (state.level >= state.config.levelCount) {
-      return { state: { ...state, guesses, lives, coins, lastReward: reward, input: '', phase: 'victory' } }
+      return {
+        state: { ...state, guesses, lives: applyTax(lives), coins, lastReward: reward, input: '', phase: 'victory' },
+      }
     }
     let won: AdventureRunState = {
       ...state,
@@ -265,6 +273,8 @@ export function submitGuess(
       phase: 'level-won',
     }
     won = applyPerkTriggers(won, guesses.length)
+    // Tax is charged after any per-level perk bonus — genuinely end of round.
+    won = { ...won, lives: applyTax(won.lives) }
     if (boss) {
       won = { ...won, shop: { ...won.shop, permanentSlots: won.shop.permanentSlots + 1 } }
     }
