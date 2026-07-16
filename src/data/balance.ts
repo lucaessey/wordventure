@@ -14,8 +14,12 @@ export interface Balance {
     levelCount: number
     /** Word length at level 1. */
     startLength: number
-    /** Guess pool at the start of a run. */
-    startingPool: number
+    /** Guess pool at the start of a run, per difficulty. */
+    startingPool: {
+      easy: number
+      medium: number
+      hard: number
+    }
     /** Pool guesses awarded for beating a level, per difficulty. */
     rewards: {
       easy: number

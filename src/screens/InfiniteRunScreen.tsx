@@ -6,24 +6,25 @@ import {
   beginLevel,
   lengthForLevel,
   removeLetter,
-  startRun,
   submitGuess,
   type CategoryOption,
-  type Difficulty,
   type InfiniteRunState,
-  type InfiniteTheme,
 } from '../engine/infinite'
 import { keyboardState } from '../engine/keyboardState'
 import type { Category } from '../engine/types'
 import { recordEvent, todayString } from '../achievements/store'
 import { loadHighScores, recordRun, saveHighScores } from '../storage/highScores'
+import { clearRun, saveRun } from '../storage/infiniteSave'
 import { Board } from '../components/Board'
 import { Keyboard } from '../components/Keyboard'
 
 interface InfiniteRunScreenProps {
-  difficulty: Difficulty
-  theme: InfiniteTheme
+  /** A fresh run from the setup screen, or a restored save. */
+  initialRun: InfiniteRunState
+  /** Which save slot this run persists to for its lifetime. */
+  slot: number
   onHome: () => void
+  onNewRun: () => void
 }
 
 const REJECTION_MESSAGES = {
@@ -51,17 +52,7 @@ type UiAction =
   | { type: 'level-ready'; data: LevelData; roll: number }
   | { type: 'key'; key: string }
   | { type: 'advance'; roll: number }
-  | { type: 'restart'; roll: number }
   | { type: 'clear-message' }
-
-function freshRun(difficulty: Difficulty, theme: InfiniteTheme, roll: number): UiState {
-  return {
-    run: startRun(difficulty, theme, CATEGORY_OPTIONS, undefined, () => roll),
-    data: null,
-    message: null,
-    shakeToken: 0,
-  }
-}
 
 function reducer(state: UiState, action: UiAction): UiState {
   switch (action.type) {
@@ -75,8 +66,6 @@ function reducer(state: UiState, action: UiAction): UiState {
       }
     case 'advance':
       return { ...state, run: advanceLevel(state.run, CATEGORY_OPTIONS, () => action.roll), data: null }
-    case 'restart':
-      return freshRun(state.run.difficulty, state.run.theme, action.roll)
     case 'clear-message':
       return { ...state, message: null }
     case 'key': {
@@ -100,12 +89,13 @@ function reducer(state: UiState, action: UiAction): UiState {
   }
 }
 
-export function InfiniteRunScreen({ difficulty, theme, onHome }: InfiniteRunScreenProps) {
-  const [{ run, data, message, shakeToken }, dispatch] = useReducer(
-    reducer,
-    undefined,
-    () => freshRun(difficulty, theme, Math.random()),
-  )
+export function InfiniteRunScreen({ initialRun, slot, onHome, onNewRun }: InfiniteRunScreenProps) {
+  const [{ run, data, message, shakeToken }, dispatch] = useReducer(reducer, undefined, () => ({
+    run: initialRun,
+    data: null,
+    message: null,
+    shakeToken: 0,
+  }))
   const [newRecord, setNewRecord] = useState(false)
   const recordedRef = useRef(false)
   // Achievement dedup guards (no game logic — just emit facts)
@@ -117,8 +107,11 @@ export function InfiniteRunScreen({ difficulty, theme, onHome }: InfiniteRunScre
   useEffect(() => {
     if (achStartedRef.current) return
     achStartedRef.current = true
-    recordEvent({ type: 'game-started', mode: 'infinite', day: todayString() })
-  }, [])
+    // Count a genuinely new run, not a resume of an in-progress one
+    if (initialRun.level === 1 && initialRun.guesses.length === 0 && initialRun.levelsBeaten === 0) {
+      recordEvent({ type: 'game-started', mode: 'infinite', day: todayString() })
+    }
+  }, [initialRun])
 
   useEffect(() => {
     if (run.level !== achLevelRef.current && (run.phase === 'playing' || run.phase === 'loading')) {
@@ -143,9 +136,11 @@ export function InfiniteRunScreen({ difficulty, theme, onHome }: InfiniteRunScre
     }
   }, [run])
 
-  // Load the level's words whenever the run enters 'loading'
+  // Load the level's words whenever the run needs them. Covers both a fresh
+  // level ('loading') and a restored save (phase 'playing' but no data yet).
   useEffect(() => {
-    if (run.phase !== 'loading') return
+    if (data !== null) return
+    if (run.phase !== 'loading' && run.phase !== 'playing') return
     let cancelled = false
     const length = lengthForLevel(run.config, run.level)
     Promise.all([loadCategory(run.categoryId), loadDictionary(length)]).then(
@@ -157,7 +152,14 @@ export function InfiniteRunScreen({ difficulty, theme, onHome }: InfiniteRunScre
     return () => {
       cancelled = true
     }
-  }, [run.phase, run.categoryId, run.level, run.config])
+  }, [data, run.phase, run.categoryId, run.level, run.config])
+
+  // Snapshot after every state change to this run's slot; run end clears that
+  // slot (no resume from a finished run)
+  useEffect(() => {
+    if (run.phase === 'run-over' || run.phase === 'victory') clearRun(slot)
+    else saveRun(run, slot)
+  }, [run, slot])
 
   // Record high scores exactly once per run end
   useEffect(() => {
@@ -250,10 +252,7 @@ export function InfiniteRunScreen({ difficulty, theme, onHome }: InfiniteRunScre
               {newRecord && <strong> — new best!</strong>}
             </p>
             <div className="overlay-buttons">
-              <button
-                className="button-primary"
-                onClick={() => dispatch({ type: 'restart', roll: Math.random() })}
-              >
+              <button className="button-primary" onClick={onNewRun}>
                 New run
               </button>
               <button className="button-secondary" onClick={onHome}>

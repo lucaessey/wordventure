@@ -5,7 +5,13 @@ import { selectAnswer } from './selectAnswer'
 import { validateGuess } from './validateGuess'
 import type { Category, ScoredGuess } from './types'
 
-export type Difficulty = 'easy' | 'medium' | 'hard'
+/**
+ * Infinite's difficulty set, as a runtime tuple so the save-storage layer can
+ * validate a loaded run against the exact same list the type is built from.
+ */
+export const INFINITE_DIFFICULTIES = ['easy', 'medium', 'hard'] as const
+
+export type Difficulty = (typeof INFINITE_DIFFICULTIES)[number]
 
 /** Theme machinery lives in categoryTheme.ts (shared with Adventure); re-exported for compat. */
 export type InfiniteTheme = CategoryTheme
@@ -14,7 +20,8 @@ export { pickLevelCategory, FALLBACK_CATEGORY_ID, type CategoryOption } from './
 export interface InfiniteConfig {
   levelCount: number
   startLength: number
-  startingPool: number
+  /** Starting banked-guess pool per difficulty. */
+  startingPool: Record<Difficulty, number>
   rewards: Record<Difficulty, number>
 }
 
@@ -54,7 +61,7 @@ export function startRun(
     difficulty,
     theme,
     level: 1,
-    pool: config.startingPool,
+    pool: config.startingPool[difficulty],
     levelsBeaten: 0,
     lastReward: 0,
     categoryId: pickLevelCategory(theme, lengthForLevel(config, 1), categories, rng),

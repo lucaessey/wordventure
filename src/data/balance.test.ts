@@ -10,7 +10,12 @@ describe('balance', () => {
   it('exposes the Infinite mode values', () => {
     const { levelCount, startLength, startingPool, rewards } = balance.infinite
     expect(levelCount).toBeGreaterThan(0)
-    expect(startingPool).toBeGreaterThan(0)
+    for (const difficulty of ['easy', 'medium', 'hard'] as const) {
+      expect(startingPool[difficulty]).toBeGreaterThan(0)
+    }
+    // Easy is the most forgiving start
+    expect(startingPool.easy).toBeGreaterThanOrEqual(startingPool.medium)
+    expect(startingPool.easy).toBeGreaterThanOrEqual(startingPool.hard)
     expect(rewards.easy).toBeGreaterThanOrEqual(rewards.medium)
     expect(rewards.medium).toBeGreaterThanOrEqual(rewards.hard)
     // The final level's word length must stay within the dictionary range (3-14)

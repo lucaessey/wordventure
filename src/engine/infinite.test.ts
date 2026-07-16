@@ -18,7 +18,7 @@ import type { Category } from './types'
 const CONFIG: InfiniteConfig = {
   levelCount: 3,
   startLength: 3,
-  startingPool: 2,
+  startingPool: { easy: 2, medium: 2, hard: 2 },
   rewards: { easy: 4, medium: 3, hard: 2 },
 }
 
@@ -55,7 +55,7 @@ function seededRng(seed: number): () => number {
 }
 
 /** Start an animals-fixed run and begin level 1 with a known answer. */
-function playingState(pool = CONFIG.startingPool): InfiniteRunState {
+function playingState(pool = CONFIG.startingPool.easy): InfiniteRunState {
   let state = startRun('easy', { kind: 'fixed', categoryId: 'animals' }, CATEGORIES, CONFIG, () => 0)
   state = { ...state, pool }
   // rng () => 0 picks the first bucket word: CAT
@@ -80,6 +80,13 @@ describe('startRun and beginLevel', () => {
     expect(state.answer).toBe('CAT')
   })
 
+  it('seeds the pool from the per-difficulty starting pool', () => {
+    const config: InfiniteConfig = { ...CONFIG, startingPool: { easy: 6, medium: 4, hard: 3 } }
+    expect(startRun('easy', { kind: 'random' }, CATEGORIES, config, () => 0).pool).toBe(6)
+    expect(startRun('medium', { kind: 'random' }, CATEGORIES, config, () => 0).pool).toBe(4)
+    expect(startRun('hard', { kind: 'random' }, CATEGORIES, config, () => 0).pool).toBe(3)
+  })
+
   it('beginLevel ignores a category that does not match the picked id', () => {
     const state = startRun('easy', { kind: 'fixed', categoryId: 'animals' }, CATEGORIES, CONFIG, () => 0)
     const wrong: Category = { ...ANIMALS, id: 'original' }
@@ -91,14 +98,14 @@ describe('pool economy', () => {
   it('drains 1 on a valid wrong guess', () => {
     const { state, rejection } = submitWord(playingState(), 'DOG')
     expect(rejection).toBeUndefined()
-    expect(state.pool).toBe(CONFIG.startingPool - 1)
+    expect(state.pool).toBe(CONFIG.startingPool.easy - 1)
     expect(state.phase).toBe('playing')
   })
 
   it('costs nothing on an invalid guess and keeps the input', () => {
     const { state, rejection } = submitWord(playingState(), 'ZZZ')
     expect(rejection).toBe('not-in-word-list')
-    expect(state.pool).toBe(CONFIG.startingPool)
+    expect(state.pool).toBe(CONFIG.startingPool.easy)
     expect(state.input).toBe('ZZZ')
   })
 
@@ -107,13 +114,13 @@ describe('pool economy', () => {
     state = addLetter(state, 'C')
     const result = submitGuess(state, DICTIONARY[3], ANIMALS.wordsByLength['3'])
     expect(result.rejection).toBe('wrong-length')
-    expect(result.state.pool).toBe(CONFIG.startingPool)
+    expect(result.state.pool).toBe(CONFIG.startingPool.easy)
   })
 
   it('applies the reward after the drain and enters level-won', () => {
     const { state } = submitWord(playingState(), 'CAT')
     expect(state.phase).toBe('level-won')
-    expect(state.pool).toBe(CONFIG.startingPool - 1 + CONFIG.rewards.easy)
+    expect(state.pool).toBe(CONFIG.startingPool.easy - 1 + CONFIG.rewards.easy)
     expect(state.levelsBeaten).toBe(1)
     expect(state.lastReward).toBe(CONFIG.rewards.easy)
   })

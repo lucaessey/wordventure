@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { categories } from './data/load'
 import { startRun as startAdventureRun, type AdventureRunState } from './engine/adventure'
 import type { CategoryOption } from './engine/categoryTheme'
-import type { Difficulty, InfiniteTheme } from './engine/infinite'
+import { startRun as startInfiniteRun, type InfiniteRunState } from './engine/infinite'
 import { HomeScreen } from './screens/HomeScreen'
 import { CategoryGridScreen } from './screens/CategoryGridScreen'
 import { LengthPickerScreen } from './screens/LengthPickerScreen'
@@ -22,7 +22,7 @@ type Screen =
   | { name: 'length-picker'; categoryId: string }
   | { name: 'game'; categoryId: string; length: number }
   | { name: 'infinite-setup' }
-  | { name: 'infinite-run'; difficulty: Difficulty; theme: InfiniteTheme }
+  | { name: 'infinite-run'; run: InfiniteRunState; slot: number }
   | { name: 'adventure-setup' }
   | { name: 'adventure-run'; run: AdventureRunState; slot: number }
   | { name: 'trophy-room' }
@@ -128,14 +128,35 @@ export default function App() {
       )}
       {screen.name === 'infinite-setup' && (
         <InfiniteSetupScreen
-          onStart={(difficulty, theme) => setScreen({ name: 'infinite-run', difficulty, theme })}
+          onStart={(difficulty, theme, slot) => {
+            setRunNonce((n) => n + 1)
+            setScreen({
+              name: 'infinite-run',
+              run: startInfiniteRun(difficulty, theme, CATEGORY_OPTIONS),
+              slot,
+            })
+          }}
+          onContinue={(run, slot) => {
+            setRunNonce((n) => n + 1)
+            setScreen({ name: 'infinite-run', run, slot })
+          }}
         />
       )}
       {screen.name === 'infinite-run' && (
         <InfiniteRunScreen
-          difficulty={screen.difficulty}
-          theme={screen.theme}
+          key={runNonce}
+          initialRun={screen.run}
+          slot={screen.slot}
           onHome={() => setScreen({ name: 'home' })}
+          onNewRun={() => {
+            setRunNonce((n) => n + 1)
+            // Retry keeps the same difficulty, theme, and slot as the run that just ended
+            setScreen({
+              name: 'infinite-run',
+              run: startInfiniteRun(screen.run.difficulty, screen.run.theme, CATEGORY_OPTIONS),
+              slot: screen.slot,
+            })
+          }}
         />
       )}
       {screen.name === 'adventure-setup' && (
