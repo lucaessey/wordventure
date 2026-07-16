@@ -18,19 +18,33 @@
       "easy": 6,
       "normal": 6,
       "hard": 4,
-      "extraHard": 4
+      "extraHard": 4,
+      "superHard": 4
     },
     "startingPerks": {
       "easy": { "perkA": 1 },
       "normal": {},
       "hard": {},
-      "extraHard": {}
+      "extraHard": {},
+      "superHard": {}
     },
     "lifeTaxPerRound": {
       "easy": 0,
       "normal": 0,
       "hard": 0,
-      "extraHard": 1
+      "extraHard": 1,
+      "superHard": 0
+    },
+    "lifeTaxRamp": {
+      "easy": [],
+      "normal": [],
+      "hard": [],
+      "extraHard": [],
+      "superHard": [
+        { "throughLevel": 10, "tax": 1 },
+        { "throughLevel": 17, "tax": 2 },
+        { "throughLevel": 25, "tax": 3 }
+      ]
     },
     "bossLevels": {
       "5": 10,
@@ -47,7 +61,8 @@
       "easy": 25,
       "normal": 20,
       "hard": 15,
-      "extraHard": 15
+      "extraHard": 15,
+      "superHard": 15
     },
     "shop": {
       "lifePrice": 3,

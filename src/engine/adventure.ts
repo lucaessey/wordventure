@@ -10,7 +10,7 @@ import type { Category, ScoredGuess } from './types'
  * `Difficulty` (`easy | medium | hard`): the middle tier differs and the two
  * modes' difficulties mean different things.
  */
-export type AdventureDifficulty = 'easy' | 'normal' | 'hard' | 'extraHard'
+export type AdventureDifficulty = 'easy' | 'normal' | 'hard' | 'extraHard' | 'superHard'
 
 export interface AdventureConfig {
   levelCount: number
@@ -18,8 +18,14 @@ export interface AdventureConfig {
   startingLives: Record<AdventureDifficulty, number>
   /** Perk tiers a difficulty starts owning for free (no slot consumed). */
   startingPerks: Record<AdventureDifficulty, { perkA?: number; perkB?: number }>
-  /** Lives lost at the end of each completed round, per difficulty (Extra Hard's tax). */
+  /** Flat lives lost at the end of each completed round, per difficulty (Extra Hard's tax). */
   lifeTaxPerRound: Record<AdventureDifficulty, number>
+  /**
+   * Level-scaled per-round life tax, per difficulty: an ascending list of
+   * `{ throughLevel, tax }` brackets. A non-empty ramp overrides the flat
+   * `lifeTaxPerRound`; an empty ramp falls back to it. (Super Hard's tax.)
+   */
+  lifeTaxRamp: Record<AdventureDifficulty, Array<{ throughLevel: number; tax: number }>>
   /** Boss level number (as string key) → word length. */
   bossLevels: Record<string, number>
   /** Word lengths for the non-boss levels in campaign order. */
@@ -117,6 +123,21 @@ export interface AdventureRunState {
 
 export function isBossLevel(config: AdventureConfig, level: number): boolean {
   return String(level) in config.bossLevels
+}
+
+/**
+ * Lives taxed at the end of a completed `level`, for the run's difficulty. A
+ * difficulty with a non-empty `lifeTaxRamp` uses the first bracket whose
+ * `throughLevel` covers the level (holding the top rate past the last bracket);
+ * otherwise the flat `lifeTaxPerRound` applies. 0 for the untaxed difficulties.
+ */
+export function roundLifeTax(config: AdventureConfig, difficulty: AdventureDifficulty, level: number): number {
+  const ramp = config.lifeTaxRamp[difficulty]
+  for (const bracket of ramp) {
+    if (level <= bracket.throughLevel) return bracket.tax
+  }
+  if (ramp.length > 0) return ramp[ramp.length - 1].tax
+  return config.lifeTaxPerRound[difficulty]
 }
 
 /** Boss levels use their design-fixed lengths; other levels follow the ramp. */
@@ -254,9 +275,10 @@ export function submitGuess(
       ? state.config.bossReward[state.difficulty]
       : state.config.rewards.level
     const coins = state.coins + reward
-    // End-of-round life tax (Extra Hard only; 0 elsewhere). Floors at 1 for a
-    // positive life total and never resurrects a 0-life (last-life) solve.
-    const tax = state.config.lifeTaxPerRound[state.difficulty]
+    // End-of-round life tax (Extra Hard flat; Super Hard scales by level; 0
+    // elsewhere). Floors at 1 for a positive life total and never resurrects a
+    // 0-life (last-life) solve.
+    const tax = roundLifeTax(state.config, state.difficulty, state.level)
     const applyTax = (l: number): number => (l > 0 ? Math.max(1, l - tax) : l)
     if (state.level >= state.config.levelCount) {
       return {

@@ -55,28 +55,32 @@ Theme: save your Wordle company from bankruptcy at the hands of a rival word-sea
 
 ### Difficulty modes
 
-Four difficulties, chosen when starting a new run:
+Five difficulties, chosen when starting a new run:
 
 - EASY: start with 6 lives. The player begins the run already owning permanent upgrade Perk A at its base tier (+1 life every level beaten), for free. This free perk does NOT consume a boss-unlock slot, and it CAN still be upgraded to +2 lives for $80 as normal once a slot is available.
 - NORMAL: start with 6 lives. Everything else exactly as the original design (no free perks).
 - HARD: the original design unchanged — start with 4 lives, no free perks.
-- EXTRA HARD: identical to Hard in every way (start with 4 lives, guesses subtract lives, no free perks, boss reward $15) EXCEPT for a per-round life tax (below).
+- EXTRA HARD: identical to Hard in every way (start with 4 lives, guesses subtract lives, no free perks, boss reward $15) EXCEPT for a flat per-round life tax of 1 (below).
+- SUPER HARD: identical to Hard/Extra Hard in every way (start with 4 lives, guesses subtract lives, no free perks, boss reward $15) EXCEPT the per-round life tax *scales up as the campaign progresses* (below).
 
-**Per-round life tax (Extra Hard only):** after finishing each round, the player loses 1 life. This applies to EVERY round, including boss rounds. The tax is charged at the END of the round, after the level is completed, not before. The tax cannot reduce the player below 1 life — it floors at 1: a player who finishes a round at 1 life keeps that 1 life and proceeds. The per-round tax by itself can never end a run; only spending the last life on a guess mid-puzzle ends a run (the last-life-solve rule, identical to Hard, is unchanged).
+**Per-round life tax (Extra Hard and Super Hard):** after finishing each round, the player loses lives equal to that difficulty's tax for the round. This applies to EVERY round, including boss rounds, and is charged at the END of the round, after the level is completed, not before. The tax cannot reduce the player below 1 life — it floors at 1: a player who finishes a round at 1 life keeps that 1 life and proceeds. The per-round tax by itself can never end a run; only spending the last life on a guess mid-puzzle ends a run (the last-life-solve rule, identical to Hard, is unchanged).
+
+- **Extra Hard** taxes a flat 1 life every round.
+- **Super Hard** ramps the tax by level bracket: levels 1–10 tax 1 life, levels 11–17 tax 2 lives, levels 18–25 tax 3 lives. The bracket is chosen by the level just completed.
 
 Rules that apply to all difficulties:
 
 - Difficulty is locked for the duration of a run; it cannot be changed mid-run. It is stored in the run's save state.
-- All other Adventure rules (economy, insurance, bosses, skips, shop timing, permanent unlock slots) are identical across difficulties. Extra Hard's only difference from Hard is the per-round life tax.
-- Starting lives per difficulty, Easy's starting perk, and the per-round life tax are defined in balance.json (e.g. `adventure.startingLives.easy/normal/hard/extraHard`, `adventure.startingPerks.easy`, `adventure.lifeTaxPerRound.extraHard`), not hardcoded, so the tax amount can be tuned later.
-- Any completion stats or records for Adventure are tracked per difficulty (including Extra Hard as its own difficulty), like Infinite mode's high scores.
+- All other Adventure rules (economy, insurance, bosses, skips, shop timing, permanent unlock slots) are identical across difficulties. Extra Hard's and Super Hard's only difference from Hard is the per-round life tax.
+- Starting lives per difficulty and Easy's starting perk are defined in balance.json (`adventure.startingLives.easy/normal/hard/extraHard/superHard`, `adventure.startingPerks.easy`), not hardcoded. The per-round tax is defined two ways: a flat amount per difficulty (`adventure.lifeTaxPerRound`, e.g. Extra Hard 1) and a per-difficulty ramp of level brackets (`adventure.lifeTaxRamp`, e.g. Super Hard's `[{throughLevel:10,tax:1},{throughLevel:17,tax:2},{throughLevel:25,tax:3}]`). When a difficulty has a ramp it wins; otherwise the flat amount applies. All values are tunable.
+- Any completion stats or records for Adventure are tracked per difficulty (including Extra Hard and Super Hard as their own difficulties), like Infinite mode's high scores.
 - The difficulty picker appears on the Adventure new-run screen; resuming a saved run bypasses the picker.
 
-Achievements are unchanged by Extra Hard: the difficulty-tiered achievement tiers stay Tier I = Easy, II = Normal, III = Hard — no Tier IV is auto-generated for Extra Hard, and "on Hard" difficulty-locked achievements remain about Hard. (Extra-Hard-specific achievements may be added later as a separate change.)
+Achievements are unchanged by Extra Hard and Super Hard: the difficulty-tiered achievement tiers stay Tier I = Easy, II = Normal, III = Hard — no Tier IV/V is auto-generated for Extra Hard or Super Hard, and "on Hard" difficulty-locked achievements remain about Hard. (Extra-Hard- or Super-Hard-specific achievements may be added later as a separate change.)
 
 ### Economy (all values in balance.json)
 
-- Earn: +$10 per non-boss level beaten (same across all difficulties). Boss reward varies by difficulty (`adventure.bossReward.easy/normal/hard/extraHard`): Easy +$25, Normal +$20, Hard +$15, Extra Hard +$15.
+- Earn: +$10 per non-boss level beaten (same across all difficulties). Boss reward varies by difficulty (`adventure.bossReward.easy/normal/hard/extraHard/superHard`): Easy +$25, Normal +$20, Hard +$15, Extra Hard +$15, Super Hard +$15.
 - Buy: +1 life $3; hint $6; level skip $50.
 - Skips: cannot skip boss levels; a skipped level pays no reward but counts as "beaten" for permanent-upgrade triggers.
 - Hints ($6 each, player picks type at time of use): (a) reveal a correct letter in its position, (b) reveal a letter that is in the word, (c) remove wrong letters from the keyboard.

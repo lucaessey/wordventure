@@ -229,3 +229,26 @@ describe('Extra Hard earns no difficulty tier (tiers unchanged) but counts for v
     expect(progress.modesWon).toContain('adventure')
   })
 })
+
+describe('Super Hard earns no difficulty tier (tiers unchanged) but counts for volume badges', () => {
+  it('difficultyTier maps Super Hard to 0 (no tier)', () => {
+    expect(difficultyTier('adventure', 'superHard')).toBe(0)
+    // The three real tiers are unchanged
+    expect(difficultyTier('adventure', 'easy')).toBe(1)
+    expect(difficultyTier('adventure', 'normal')).toBe(2)
+    expect(difficultyTier('adventure', 'hard')).toBe(3)
+  })
+
+  it('a Super Hard boss beat earns no First Blood tier', () => {
+    const { progress } = run([{ type: 'boss-beaten', difficulty: 'superHard' }])
+    expect(progress.earned['first-blood'] ?? []).toEqual([])
+  })
+
+  it('a Super Hard win still counts toward Champion (volume, not tiered)', () => {
+    const { progress } = run([
+      { type: 'word-solved', mode: 'adventure', difficulty: 'superHard', guessesUsed: 2, maxGuesses: 0, answerLength: 5, hadYellow: true },
+    ])
+    expect(progress.counters.totalWins).toBe(1)
+    expect(progress.modesWon).toContain('adventure')
+  })
+})

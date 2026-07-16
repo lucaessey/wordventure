@@ -1,7 +1,14 @@
 import { describe, expect, it } from 'vitest'
 import { clearRun, loadRun, saveRun } from './adventureSave'
 import { startRun, submitGuess, addLetter, beginLevel } from '../engine/adventure'
-import { TEST_BOSS_REWARD, TEST_LIFE_TAX, TEST_SHOP, TEST_STARTING_LIVES, TEST_STARTING_PERKS } from '../engine/adventure.test'
+import {
+  TEST_BOSS_REWARD,
+  TEST_LIFE_TAX,
+  TEST_LIFE_TAX_RAMP,
+  TEST_SHOP,
+  TEST_STARTING_LIVES,
+  TEST_STARTING_PERKS,
+} from '../engine/adventure.test'
 import type { StorageLike } from './highScores'
 import type { Category } from '../engine/types'
 
@@ -37,6 +44,7 @@ function midPuzzleRun() {
       startingLives: TEST_STARTING_LIVES,
       startingPerks: TEST_STARTING_PERKS,
       lifeTaxPerRound: TEST_LIFE_TAX,
+      lifeTaxRamp: TEST_LIFE_TAX_RAMP,
       bossLevels: { '3': 5 },
       nonBossRamp: [3, 3, 4],
       rewards: { level: 10 },

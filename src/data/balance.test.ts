@@ -18,9 +18,18 @@ describe('balance', () => {
   })
 
   it('exposes a consistent Adventure campaign shape', () => {
-    const { levelCount, startingLives, startingPerks, bossLevels, nonBossRamp, rewards, bossReward, lifeTaxPerRound } =
-      balance.adventure
-    for (const difficulty of ['easy', 'normal', 'hard', 'extraHard'] as const) {
+    const {
+      levelCount,
+      startingLives,
+      startingPerks,
+      bossLevels,
+      nonBossRamp,
+      rewards,
+      bossReward,
+      lifeTaxPerRound,
+      lifeTaxRamp,
+    } = balance.adventure
+    for (const difficulty of ['easy', 'normal', 'hard', 'extraHard', 'superHard'] as const) {
       expect(startingLives[difficulty]).toBeGreaterThan(0)
       // Starting perk tiers, when present, are valid perk levels (1 = base, 2 = upgraded)
       for (const tier of Object.values(startingPerks[difficulty])) {
@@ -29,13 +38,28 @@ describe('balance', () => {
       // Boss reward is a positive per-difficulty value
       expect(bossReward[difficulty]).toBeGreaterThan(0)
     }
-    // Extra Hard mirrors Hard's start and taxes a life each round; the rest do not
+    // Extra Hard mirrors Hard's start and taxes a flat life each round via lifeTaxPerRound
     expect(startingLives.extraHard).toBe(startingLives.hard)
     expect(bossReward.extraHard).toBe(bossReward.hard)
     expect(lifeTaxPerRound.extraHard).toBeGreaterThan(0)
+    expect(lifeTaxRamp.extraHard).toEqual([]) // flat tax, no ramp
     for (const difficulty of ['easy', 'normal', 'hard'] as const) {
       expect(lifeTaxPerRound[difficulty]).toBe(0)
+      expect(lifeTaxRamp[difficulty]).toEqual([])
     }
+    // Super Hard mirrors Hard's start but scales the tax up by level via lifeTaxRamp
+    expect(startingLives.superHard).toBe(startingLives.hard)
+    expect(bossReward.superHard).toBe(bossReward.hard)
+    expect(lifeTaxPerRound.superHard).toBe(0) // ramp-driven, not flat
+    const ramp = lifeTaxRamp.superHard
+    expect(ramp.length).toBeGreaterThan(1)
+    // Brackets ascend by throughLevel and by tax, and cover the full campaign
+    for (let i = 1; i < ramp.length; i++) {
+      expect(ramp[i].throughLevel).toBeGreaterThan(ramp[i - 1].throughLevel)
+      expect(ramp[i].tax).toBeGreaterThan(ramp[i - 1].tax)
+    }
+    expect(ramp[0].tax).toBeGreaterThan(0)
+    expect(ramp[ramp.length - 1].throughLevel).toBe(levelCount)
     expect(rewards.level).toBeGreaterThan(0)
 
     const bossEntries = Object.entries(bossLevels)

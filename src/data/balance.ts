@@ -32,6 +32,7 @@ export interface Balance {
       normal: number
       hard: number
       extraHard: number
+      superHard: number
     }
     /** Perk tiers a difficulty starts owning for free (no slot consumed). */
     startingPerks: {
@@ -39,13 +40,27 @@ export interface Balance {
       normal: { perkA?: number; perkB?: number }
       hard: { perkA?: number; perkB?: number }
       extraHard: { perkA?: number; perkB?: number }
+      superHard: { perkA?: number; perkB?: number }
     }
-    /** Lives lost at the end of each completed round, per difficulty (Extra Hard's tax). */
+    /** Flat lives lost at the end of each completed round, per difficulty (Extra Hard's tax). */
     lifeTaxPerRound: {
       easy: number
       normal: number
       hard: number
       extraHard: number
+      superHard: number
+    }
+    /**
+     * Level-scaled per-round life tax, per difficulty: an ascending list of
+     * `{ throughLevel, tax }` brackets. A non-empty ramp overrides the flat
+     * `lifeTaxPerRound`; an empty ramp falls back to it. (Super Hard's tax.)
+     */
+    lifeTaxRamp: {
+      easy: Array<{ throughLevel: number; tax: number }>
+      normal: Array<{ throughLevel: number; tax: number }>
+      hard: Array<{ throughLevel: number; tax: number }>
+      extraHard: Array<{ throughLevel: number; tax: number }>
+      superHard: Array<{ throughLevel: number; tax: number }>
     }
     /** Boss level number → word length. Design-fixed; do not retune casually. */
     bossLevels: Record<string, number>
@@ -61,6 +76,7 @@ export interface Balance {
       normal: number
       hard: number
       extraHard: number
+      superHard: number
     }
     shop: {
       lifePrice: number

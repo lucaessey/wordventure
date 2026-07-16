@@ -7,6 +7,7 @@ import {
   isBossLevel,
   lengthForLevel,
   removeLetter,
+  roundLifeTax,
   startRun,
   submitGuess,
   type AdventureConfig,
@@ -27,11 +28,12 @@ export const TEST_SHOP: AdventureConfig['shop'] = {
 }
 
 /** Shared per-difficulty start for test configs: 4 lives all round, no free perks. */
-export const TEST_STARTING_LIVES: AdventureConfig['startingLives'] = { easy: 4, normal: 4, hard: 4, extraHard: 4 }
-export const TEST_STARTING_PERKS: AdventureConfig['startingPerks'] = { easy: {}, normal: {}, hard: {}, extraHard: {} }
-/** No per-round tax in shared fixtures (Extra Hard tax is exercised by dedicated tests). */
-export const TEST_LIFE_TAX: AdventureConfig['lifeTaxPerRound'] = { easy: 0, normal: 0, hard: 0, extraHard: 0 }
-export const TEST_BOSS_REWARD: AdventureConfig['bossReward'] = { easy: 25, normal: 20, hard: 15, extraHard: 15 }
+export const TEST_STARTING_LIVES: AdventureConfig['startingLives'] = { easy: 4, normal: 4, hard: 4, extraHard: 4, superHard: 4 }
+export const TEST_STARTING_PERKS: AdventureConfig['startingPerks'] = { easy: {}, normal: {}, hard: {}, extraHard: {}, superHard: {} }
+/** No per-round tax in shared fixtures (the tax difficulties are exercised by dedicated tests). */
+export const TEST_LIFE_TAX: AdventureConfig['lifeTaxPerRound'] = { easy: 0, normal: 0, hard: 0, extraHard: 0, superHard: 0 }
+export const TEST_LIFE_TAX_RAMP: AdventureConfig['lifeTaxRamp'] = { easy: [], normal: [], hard: [], extraHard: [], superHard: [] }
+export const TEST_BOSS_REWARD: AdventureConfig['bossReward'] = { easy: 25, normal: 20, hard: 15, extraHard: 15, superHard: 15 }
 
 // Small campaign: 4 levels, boss at 3 (length 5). Non-boss lengths 3, 3, 4.
 const CONFIG: AdventureConfig = {
@@ -39,6 +41,7 @@ const CONFIG: AdventureConfig = {
   startingLives: TEST_STARTING_LIVES,
   startingPerks: TEST_STARTING_PERKS,
   lifeTaxPerRound: TEST_LIFE_TAX,
+  lifeTaxRamp: TEST_LIFE_TAX_RAMP,
   bossLevels: { '3': 5 },
   nonBossRamp: [3, 3, 4],
   rewards: { level: 10 },
@@ -144,8 +147,8 @@ describe('difficulty', () => {
   // A config with the real per-difficulty starts: Easy/Normal 6, Hard 4; Easy free Perk A.
   const DIFF_CONFIG: AdventureConfig = {
     ...CONFIG,
-    startingLives: { easy: 6, normal: 6, hard: 4, extraHard: 4 },
-    startingPerks: { easy: { perkA: 1 }, normal: {}, hard: {}, extraHard: {} },
+    startingLives: { easy: 6, normal: 6, hard: 4, extraHard: 4, superHard: 4 },
+    startingPerks: { easy: { perkA: 1 }, normal: {}, hard: {}, extraHard: {}, superHard: {} },
   }
 
   it('seeds per-difficulty starting lives', () => {
@@ -358,7 +361,7 @@ describe('Extra Hard per-round life tax', () => {
   // Same small campaign, but Extra Hard taxes 1 life per completed round.
   const EH_CONFIG: AdventureConfig = {
     ...CONFIG,
-    lifeTaxPerRound: { easy: 0, normal: 0, hard: 0, extraHard: 1 },
+    lifeTaxPerRound: { easy: 0, normal: 0, hard: 0, extraHard: 1, superHard: 0 },
   }
 
   function ehState(over: Partial<AdventureRunState> = {}): AdventureRunState {
@@ -413,5 +416,89 @@ describe('Extra Hard per-round life tax', () => {
   it('other difficulties are untaxed (only the guess cost)', () => {
     const hardWon = solveRound(ehState({ difficulty: 'hard', lives: 4 }))
     expect(hardWon.lives).toBe(3)
+  })
+})
+
+describe('Super Hard scaling per-round life tax', () => {
+  // Long campaign, no bosses, with Super Hard's level-bracket ramp so we can
+  // land on any level without hitting victory or boss handling.
+  const SH_CONFIG: AdventureConfig = {
+    ...CONFIG,
+    levelCount: 30,
+    bossLevels: {},
+    lifeTaxRamp: {
+      easy: [],
+      normal: [],
+      hard: [],
+      extraHard: [],
+      superHard: [
+        { throughLevel: 10, tax: 1 },
+        { throughLevel: 17, tax: 2 },
+        { throughLevel: 25, tax: 3 },
+      ],
+    },
+  }
+
+  function shState(over: Partial<AdventureRunState> = {}): AdventureRunState {
+    return {
+      config: SH_CONFIG,
+      difficulty: 'superHard',
+      theme: { kind: 'random' },
+      level: 1,
+      lives: 8,
+      coins: 0,
+      lastReward: 0,
+      categoryId: 'original',
+      answer: 'CAT',
+      guesses: [],
+      input: '',
+      phase: 'playing',
+      shop: emptyShop(),
+      ...over,
+    }
+  }
+
+  const solveRound = (s: AdventureRunState) => submitGuess({ ...s, input: s.answer }, [s.answer], [s.answer]).state
+
+  it('resolves the ramp by level bracket (helper): 1 through 10, 2 through 17, 3 through 25', () => {
+    for (const level of [1, 5, 10]) expect(roundLifeTax(SH_CONFIG, 'superHard', level)).toBe(1)
+    for (const level of [11, 15, 17]) expect(roundLifeTax(SH_CONFIG, 'superHard', level)).toBe(2)
+    for (const level of [18, 25]) expect(roundLifeTax(SH_CONFIG, 'superHard', level)).toBe(3)
+  })
+
+  it('holds the top rate past the last bracket', () => {
+    expect(roundLifeTax(SH_CONFIG, 'superHard', 26)).toBe(3)
+  })
+
+  it('taxes 1 life on levels 1–10, on top of the guess cost', () => {
+    expect(solveRound(shState({ level: 1, lives: 8 })).lives).toBe(6) // 8 − 1 guess − 1 tax
+    expect(solveRound(shState({ level: 10, lives: 8 })).lives).toBe(6)
+  })
+
+  it('taxes 2 lives on levels 11–17', () => {
+    expect(solveRound(shState({ level: 11, lives: 8 })).lives).toBe(5) // 8 − 1 − 2
+    expect(solveRound(shState({ level: 17, lives: 8 })).lives).toBe(5)
+  })
+
+  it('taxes 3 lives on levels 18–25', () => {
+    expect(solveRound(shState({ level: 18, lives: 8 })).lives).toBe(4) // 8 − 1 − 3
+    expect(solveRound(shState({ level: 25, lives: 8 })).lives).toBe(4)
+  })
+
+  it('the scaling tax still floors at 1 (tax-3 bracket with 2 lives keeps 1)', () => {
+    const won = solveRound(shState({ level: 18, lives: 2 })) // 2 − 1 guess = 1, tax 3 floors at 1
+    expect(won.phase).toBe('level-won')
+    expect(won.lives).toBe(1)
+  })
+
+  it('does not resurrect a last-life solve — the run still ends on advancing', () => {
+    const won = solveRound(shState({ level: 18, lives: 1 })) // 1 − 1 guess = 0; tax leaves 0
+    expect(won.lives).toBe(0)
+    expect(advanceLevel(won, CATEGORIES, () => 0).phase).toBe('run-over')
+  })
+
+  it('other difficulties are untaxed under the same config (empty ramp → flat 0)', () => {
+    expect(roundLifeTax(SH_CONFIG, 'hard', 25)).toBe(0)
+    expect(solveRound(shState({ difficulty: 'hard', level: 25, lives: 8 })).lives).toBe(7) // only the guess
   })
 })
