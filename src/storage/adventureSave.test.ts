@@ -63,25 +63,25 @@ describe('adventure save', () => {
     const { storage } = memoryStorage()
     const run = midPuzzleRun()
     expect(run.guesses).toHaveLength(1) // one scored guess in the snapshot
-    saveRun(run, storage)
-    expect(loadRun(storage)).toEqual(run)
+    saveRun(run, 0, storage)
+    expect(loadRun(0, storage)).toEqual(run)
   })
 
   it('returns null when nothing is saved', () => {
     const { storage } = memoryStorage()
-    expect(loadRun(storage)).toBeNull()
+    expect(loadRun(0, storage)).toBeNull()
   })
 
   it('rejects corrupt JSON', () => {
     const { storage } = memoryStorage({ 'wordventure.adventure.run': '{oops' })
-    expect(loadRun(storage)).toBeNull()
+    expect(loadRun(0, storage)).toBeNull()
   })
 
   it('rejects wrong-shaped saves', () => {
     const { storage } = memoryStorage({
       'wordventure.adventure.run': JSON.stringify({ level: 'three', lives: 2 }),
     })
-    expect(loadRun(storage)).toBeNull()
+    expect(loadRun(0, storage)).toBeNull()
   })
 
   it('round-trips shop state exactly', () => {
@@ -103,46 +103,90 @@ describe('adventure save', () => {
         },
       },
     }
-    saveRun(run, storage)
-    expect(loadRun(storage)).toEqual(run)
+    saveRun(run, 0, storage)
+    expect(loadRun(0, storage)).toEqual(run)
   })
 
   it('rejects a pre-shop save (no shop field)', () => {
     const { shop: _shop, ...oldSave } = midPuzzleRun()
     const { storage } = memoryStorage({ 'wordventure.adventure.run': JSON.stringify(oldSave) })
-    expect(loadRun(storage)).toBeNull()
+    expect(loadRun(0, storage)).toBeNull()
   })
 
   it('preserves difficulty across a round-trip', () => {
     const { storage } = memoryStorage()
     const run = { ...midPuzzleRun(), difficulty: 'easy' as const }
-    saveRun(run, storage)
-    expect(loadRun(storage)?.difficulty).toBe('easy')
+    saveRun(run, 0, storage)
+    expect(loadRun(0, storage)?.difficulty).toBe('easy')
   })
 
   it('rejects a pre-difficulty save (no difficulty field)', () => {
     const { difficulty: _difficulty, ...oldSave } = midPuzzleRun()
     const { storage } = memoryStorage({ 'wordventure.adventure.run': JSON.stringify(oldSave) })
-    expect(loadRun(storage)).toBeNull()
+    expect(loadRun(0, storage)).toBeNull()
   })
 
   it('rejects saves with an unknown phase', () => {
     const bad = { ...midPuzzleRun(), phase: 'shopping' }
     const { storage } = memoryStorage({ 'wordventure.adventure.run': JSON.stringify(bad) })
-    expect(loadRun(storage)).toBeNull()
+    expect(loadRun(0, storage)).toBeNull()
   })
 
   it('clears the save', () => {
     const { storage, data } = memoryStorage()
-    saveRun(midPuzzleRun(), storage)
-    clearRun(storage)
+    saveRun(midPuzzleRun(), 0, storage)
+    clearRun(0, storage)
     expect(data['wordventure.adventure.run']).toBeUndefined()
-    expect(loadRun(storage)).toBeNull()
+    expect(loadRun(0, storage)).toBeNull()
   })
 
   it('survives a null storage', () => {
-    expect(loadRun(null)).toBeNull()
-    expect(() => saveRun(midPuzzleRun(), null)).not.toThrow()
-    expect(() => clearRun(null)).not.toThrow()
+    expect(loadRun(0, null)).toBeNull()
+    expect(() => saveRun(midPuzzleRun(), 0, null)).not.toThrow()
+    expect(() => clearRun(0, null)).not.toThrow()
+  })
+})
+
+describe('adventure save slots', () => {
+  it('persists two runs independently across slots', () => {
+    const { storage } = memoryStorage()
+    const runA = { ...midPuzzleRun(), coins: 11 }
+    const runB = { ...midPuzzleRun(), coins: 22, difficulty: 'easy' as const }
+    saveRun(runA, 0, storage)
+    saveRun(runB, 1, storage)
+    expect(loadRun(0, storage)).toEqual(runA)
+    expect(loadRun(1, storage)).toEqual(runB)
+  })
+
+  it('slot 0 uses the legacy single-save key so a pre-existing run appears as slot 1', () => {
+    const { storage, data } = memoryStorage()
+    saveRun(midPuzzleRun(), 0, storage)
+    expect(data['wordventure.adventure.run']).toBeDefined()
+    expect(loadRun(0, storage)).not.toBeNull()
+  })
+
+  it('clearing one slot leaves the other intact', () => {
+    const { storage } = memoryStorage()
+    saveRun(midPuzzleRun(), 0, storage)
+    saveRun(midPuzzleRun(), 1, storage)
+    clearRun(0, storage)
+    expect(loadRun(0, storage)).toBeNull()
+    expect(loadRun(1, storage)).not.toBeNull()
+  })
+
+  it('an out-of-range slot is a safe no-op', () => {
+    const { storage } = memoryStorage()
+    expect(() => saveRun(midPuzzleRun(), 5, storage)).not.toThrow()
+    expect(loadRun(5, storage)).toBeNull()
+    expect(() => clearRun(5, storage)).not.toThrow()
+  })
+
+  it('resumes every difficulty, including Extra Hard and Super Hard', () => {
+    for (const difficulty of ['easy', 'normal', 'hard', 'extraHard', 'superHard'] as const) {
+      const { storage } = memoryStorage()
+      const run = { ...midPuzzleRun(), difficulty }
+      saveRun(run, 0, storage)
+      expect(loadRun(0, storage)?.difficulty).toBe(difficulty)
+    }
   })
 })

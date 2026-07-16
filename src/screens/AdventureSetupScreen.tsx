@@ -4,11 +4,11 @@ import { categories } from '../data/load'
 import { STORY_INTRO } from '../data/story'
 import type { AdventureDifficulty, AdventureRunState } from '../engine/adventure'
 import type { CategoryTheme } from '../engine/categoryTheme'
-import { loadRun } from '../storage/adventureSave'
+import { loadRun, SAVE_SLOTS } from '../storage/adventureSave'
 
 interface AdventureSetupScreenProps {
-  onStart: (difficulty: AdventureDifficulty, theme: CategoryTheme) => void
-  onContinue: (run: AdventureRunState) => void
+  onStart: (difficulty: AdventureDifficulty, theme: CategoryTheme, slot: number) => void
+  onContinue: (run: AdventureRunState, slot: number) => void
 }
 
 type ThemeKind = CategoryTheme['kind']
@@ -45,20 +45,19 @@ export function AdventureSetupScreen({ onStart, onContinue }: AdventureSetupScre
   const [themeKind, setThemeKind] = useState<ThemeKind>('random')
   const [fixedCategory, setFixedCategory] = useState(categories[0].id)
   const [customIds, setCustomIds] = useState<string[]>(categories.map((c) => c.id))
-  const [save] = useState(loadRun)
+  // Read every slot once so the list stays stable while configuring a new run.
+  const [slots] = useState(() => Array.from({ length: SAVE_SLOTS }, (_, slot) => loadRun(slot)))
 
   function toggleCustom(id: string) {
     setCustomIds((ids) => (ids.includes(id) ? ids.filter((i) => i !== id) : [...ids, id]))
   }
 
-  function start() {
-    const theme: CategoryTheme =
-      themeKind === 'fixed'
-        ? { kind: 'fixed', categoryId: fixedCategory }
-        : themeKind === 'custom'
-          ? { kind: 'custom', categoryIds: customIds }
-          : { kind: 'random' }
-    onStart(difficulty, theme)
+  function buildTheme(): CategoryTheme {
+    return themeKind === 'fixed'
+      ? { kind: 'fixed', categoryId: fixedCategory }
+      : themeKind === 'custom'
+        ? { kind: 'custom', categoryIds: customIds }
+        : { kind: 'random' }
   }
 
   const startDisabled = themeKind === 'custom' && customIds.length === 0
@@ -66,16 +65,6 @@ export function AdventureSetupScreen({ onStart, onContinue }: AdventureSetupScre
   return (
     <div className="setup">
       <p className="story-intro">{STORY_INTRO}</p>
-
-      {save && (
-        <button className="continue-card" onClick={() => onContinue(save)}>
-          <span className="continue-title">Continue your run</span>
-          <span className="continue-detail">
-            {DIFFICULTY_LABELS[save.difficulty]} · Level {save.level}/{save.config.levelCount} ·{' '}
-            {save.lives} {save.lives === 1 ? 'life' : 'lives'} · ${save.coins}
-          </span>
-        </button>
-      )}
 
       <h3 className="setup-heading">Difficulty</h3>
       <div className="chip-row chip-row-difficulty">
@@ -143,9 +132,38 @@ export function AdventureSetupScreen({ onStart, onContinue }: AdventureSetupScre
         </div>
       )}
 
-      <button className="button-primary setup-start" onClick={start} disabled={startDisabled}>
-        {save ? 'New run (overwrites your save)' : 'Start the campaign'}
-      </button>
+      <h3 className="setup-heading">Your runs</h3>
+      <div className="slot-list">
+        {slots.map((save, slot) => (
+          <div className={`slot-card${save ? '' : ' slot-card-empty'}`} key={slot}>
+            <div className="slot-head">
+              <span className="slot-name">Slot {slot + 1}</span>
+              {save ? (
+                <span className="slot-detail">
+                  {DIFFICULTY_LABELS[save.difficulty]} · Level {save.level}/{save.config.levelCount}{' '}
+                  · ♥ {save.lives} · ${save.coins}
+                </span>
+              ) : (
+                <span className="slot-detail slot-empty-text">Empty</span>
+              )}
+            </div>
+            <div className="slot-actions">
+              {save && (
+                <button className="button-primary slot-action" onClick={() => onContinue(save, slot)}>
+                  Continue
+                </button>
+              )}
+              <button
+                className={`${save ? 'button-secondary' : 'button-primary'} slot-action`}
+                disabled={startDisabled}
+                onClick={() => onStart(difficulty, buildTheme(), slot)}
+              >
+                {save ? 'New run (overwrites)' : 'Start new run'}
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   )
 }

@@ -474,6 +474,62 @@ button {
   color: var(--text-dim);
 }
 
+.slot-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0 4px;
+}
+
+.slot-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+  background: var(--surface-raised);
+  border: 1px solid var(--green);
+  border-radius: var(--radius);
+  text-align: left;
+}
+
+.slot-card-empty {
+  border-style: dashed;
+  border-color: var(--border);
+}
+
+.slot-head {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.slot-name {
+  font-weight: 700;
+  color: var(--green);
+}
+
+.slot-card-empty .slot-name {
+  color: var(--text-dim);
+}
+
+.slot-detail {
+  font-size: 0.85rem;
+  color: var(--text-dim);
+}
+
+.slot-empty-text {
+  font-style: italic;
+}
+
+.slot-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.slot-action {
+  flex: 1;
+}
+
 .run-badges {
   display: flex;
   gap: 6px;

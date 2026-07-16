@@ -37,6 +37,8 @@ import { Keyboard } from '../components/Keyboard'
 interface AdventureRunScreenProps {
   /** A fresh run from the setup screen, or a restored save. */
   initialRun: AdventureRunState
+  /** Which save slot this run persists to for its lifetime. */
+  slot: number
   onHome: () => void
   onNewRun: () => void
 }
@@ -158,7 +160,7 @@ function mergedKeyStates(run: AdventureRunState): Record<string, LetterState> {
   return states
 }
 
-export function AdventureRunScreen({ initialRun, onHome, onNewRun }: AdventureRunScreenProps) {
+export function AdventureRunScreen({ initialRun, slot, onHome, onNewRun }: AdventureRunScreenProps) {
   const [{ run, data, message, shakeToken, bossIntro, hintPicker }, dispatch] = useReducer(
     reducer,
     undefined,
@@ -190,11 +192,12 @@ export function AdventureRunScreen({ initialRun, onHome, onNewRun }: AdventureRu
     }
   }, [data, run.phase, run.categoryId, run.level, run.config])
 
-  // Snapshot after every state change; run end clears the save (full restart, no checkpoints)
+  // Snapshot after every state change to this run's slot; run end clears that
+  // slot (full restart, no checkpoints)
   useEffect(() => {
-    if (run.phase === 'run-over' || run.phase === 'victory') clearRun()
-    else saveRun(run)
-  }, [run])
+    if (run.phase === 'run-over' || run.phase === 'victory') clearRun(slot)
+    else saveRun(run, slot)
+  }, [run, slot])
 
   // Achievements: emit gameplay facts (no game logic). Refs dedup per run/level.
   const achStartedRef = useRef(false)

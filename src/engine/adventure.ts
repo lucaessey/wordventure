@@ -10,7 +10,15 @@ import type { Category, ScoredGuess } from './types'
  * `Difficulty` (`easy | medium | hard`): the middle tier differs and the two
  * modes' difficulties mean different things.
  */
-export type AdventureDifficulty = 'easy' | 'normal' | 'hard' | 'extraHard' | 'superHard'
+/**
+ * The Adventure difficulty set, as a runtime tuple so the storage layer can
+ * validate a loaded save against the exact same list the type is built from —
+ * they can never drift apart (a past drift silently broke resuming the harder
+ * difficulties).
+ */
+export const ADVENTURE_DIFFICULTIES = ['easy', 'normal', 'hard', 'extraHard', 'superHard'] as const
+
+export type AdventureDifficulty = (typeof ADVENTURE_DIFFICULTIES)[number]
 
 export interface AdventureConfig {
   levelCount: number

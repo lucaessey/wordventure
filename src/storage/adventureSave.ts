@@ -1,16 +1,24 @@
-import type { AdventureRunState } from '../engine/adventure'
+import { ADVENTURE_DIFFICULTIES, type AdventureRunState } from '../engine/adventure'
 import type { StorageLike } from './highScores'
 
 /**
- * Adventure save/resume: the whole run state snapshots to one localStorage
- * key after every guess. The answer is stored in plain text — cheatable via
- * DevTools, which is fine for this project.
+ * Adventure save/resume: the whole run state snapshots to a per-slot
+ * localStorage key after every guess. The answer is stored in plain text —
+ * cheatable via DevTools, which is fine for this project.
+ *
+ * There are two independent slots. Slot 0 keeps the original single-save key
+ * so a pre-existing run appears as slot 1 with no migration; slot 1 uses a
+ * new key.
  */
 
-const STORAGE_KEY = 'wordventure.adventure.run'
+const SLOT_KEYS = ['wordventure.adventure.run', 'wordventure.adventure.run.2'] as const
+
+/** Number of independent Adventure save slots. */
+export const SAVE_SLOTS = SLOT_KEYS.length
 
 const PHASES = ['loading', 'playing', 'level-won', 'revived', 'run-over', 'victory']
-const DIFFICULTIES = ['easy', 'normal', 'hard']
+// Validated against the engine's own list so the two can never drift apart.
+const DIFFICULTIES: readonly string[] = ADVENTURE_DIFFICULTIES
 
 function defaultStorage(): StorageLike | null {
   try {
@@ -72,18 +80,26 @@ function isValidShop(value: unknown): boolean {
 
 export function saveRun(
   run: AdventureRunState,
+  slot = 0,
   storage: StorageLike | null = defaultStorage(),
 ): void {
+  const key = SLOT_KEYS[slot]
+  if (!key) return
   try {
-    storage?.setItem(STORAGE_KEY, JSON.stringify(run))
+    storage?.setItem(key, JSON.stringify(run))
   } catch {
     // Private mode or quota — the run just is not resumable
   }
 }
 
-export function loadRun(storage: StorageLike | null = defaultStorage()): AdventureRunState | null {
+export function loadRun(
+  slot = 0,
+  storage: StorageLike | null = defaultStorage(),
+): AdventureRunState | null {
+  const key = SLOT_KEYS[slot]
+  if (!key) return null
   try {
-    const raw = storage?.getItem(STORAGE_KEY)
+    const raw = storage?.getItem(key)
     if (!raw) return null
     const parsed: unknown = JSON.parse(raw)
     return isValidRun(parsed) ? parsed : null
@@ -92,9 +108,11 @@ export function loadRun(storage: StorageLike | null = defaultStorage()): Adventu
   }
 }
 
-export function clearRun(storage: StorageLike | null = defaultStorage()): void {
+export function clearRun(slot = 0, storage: StorageLike | null = defaultStorage()): void {
+  const key = SLOT_KEYS[slot]
+  if (!key) return
   try {
-    storage?.removeItem?.(STORAGE_KEY)
+    storage?.removeItem?.(key)
   } catch {
     // Nothing to do
   }

@@ -24,7 +24,7 @@ type Screen =
   | { name: 'infinite-setup' }
   | { name: 'infinite-run'; difficulty: Difficulty; theme: InfiniteTheme }
   | { name: 'adventure-setup' }
-  | { name: 'adventure-run'; run: AdventureRunState }
+  | { name: 'adventure-run'; run: AdventureRunState; slot: number }
   | { name: 'trophy-room' }
 
 function categoryName(categoryId: string): string {
@@ -140,16 +140,17 @@ export default function App() {
       )}
       {screen.name === 'adventure-setup' && (
         <AdventureSetupScreen
-          onStart={(difficulty, theme) => {
+          onStart={(difficulty, theme, slot) => {
             setRunNonce((n) => n + 1)
             setScreen({
               name: 'adventure-run',
               run: startAdventureRun(difficulty, theme, CATEGORY_OPTIONS),
+              slot,
             })
           }}
-          onContinue={(run) => {
+          onContinue={(run, slot) => {
             setRunNonce((n) => n + 1)
-            setScreen({ name: 'adventure-run', run })
+            setScreen({ name: 'adventure-run', run, slot })
           }}
         />
       )}
@@ -157,13 +158,15 @@ export default function App() {
         <AdventureRunScreen
           key={runNonce}
           initialRun={screen.run}
+          slot={screen.slot}
           onHome={() => setScreen({ name: 'home' })}
           onNewRun={() => {
             setRunNonce((n) => n + 1)
-            // Retry keeps the same difficulty as the run that just ended
+            // Retry keeps the same difficulty and slot as the run that just ended
             setScreen({
               name: 'adventure-run',
               run: startAdventureRun(screen.run.difficulty, screen.run.theme, CATEGORY_OPTIONS),
+              slot: screen.slot,
             })
           }}
         />
