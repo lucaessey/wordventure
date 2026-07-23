@@ -123,6 +123,44 @@ button {
   margin-bottom: 6px;
 }
 
+.creator-links {
+  margin-top: 18px;
+}
+
+.creator-link-row {
+  display: flex;
+  gap: 8px;
+  margin: 0 4px;
+}
+
+.creator-link {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px;
+  color: var(--text);
+  text-decoration: none;
+  font-weight: 700;
+}
+
+.creator-link:hover {
+  border-color: var(--green);
+}
+
+.creator-emoji {
+  font-size: 1.3rem;
+  line-height: 1;
+}
+
+.creator-label {
+  text-transform: lowercase;
+}
+
 .badge {
   display: flex;
   align-items: center;

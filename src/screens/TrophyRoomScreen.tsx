@@ -48,6 +48,30 @@ export function TrophyRoomScreen() {
           })}
         </section>
       ))}
+
+      <section className="trophy-group creator-links">
+        <h3 className="setup-heading">More by this creator</h3>
+        <div className="creator-link-row">
+          <a
+            className="creator-link"
+            href="https://lucaessey.github.io/phaser-snake/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <span className="creator-emoji" aria-hidden="true">🐍</span>
+            <span className="creator-label">snake</span>
+          </a>
+          <a
+            className="creator-link"
+            href="https://lucaessey.github.io/Boggle/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <span className="creator-emoji" aria-hidden="true">🔠</span>
+            <span className="creator-label">boggle</span>
+          </a>
+        </div>
+      </section>
     </div>
   )
 }
